@@ -3,6 +3,7 @@
 #include "tree.h"
 #include "table.h"
 #include <stack>
+#include <string>
 
 struct ExprState {
 	Expr* expr;
@@ -13,6 +14,7 @@ struct ExprState {
 class IterRun {
 	std::stack<ExprState> estack;
 	TTable<std::string, int> vars;
+	std::stack<std::stack<std::string>> varscope;
 	std::stack<int> intstack;
 	std::stack<std::string> strstack;
 public:

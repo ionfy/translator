@@ -1,6 +1,8 @@
 #include "iter.h"
 #include <cmath>
 #include <iostream>
+#include <stack>
+#include <string>
 
 #define SIMPLEOPERATION(type, op)                    \
 case OperationType::type:                            \
@@ -19,7 +21,14 @@ case OperationType::type:                            \
 	break;
 
 void IterRun::process(Var* expr, char state) {
-	if (state == 0) intstack.push(vars.get(expr->getVal()));
+	if (state == 0) {
+		if (vars.contain(expr->getVal()))
+			intstack.push(vars.get(expr->getVal()));
+		else {
+			std::cerr << "Used undeclared var: " << expr->getVal() << std::endl;
+			throw -1;
+		}
+	}
 	else strstack.push(expr->getVal());
 }
 
@@ -40,6 +49,20 @@ void IterRun::process(UnOperation* expr, char state) {
 				next = intstack.top();
 				intstack.pop();
 				std::cout << next << std::endl;
+			}
+			break;
+
+		case OperationType::BLOCK:
+			if (state == 0) {
+				varscope.push(std::stack<std::string>());
+				estack.push(ExprState(expr, 1));
+				estack.push(ExprState(expr->getNext()));
+			}
+			else {
+				while (!varscope.top().empty()) {
+					vars.remove(varscope.top().top());
+					varscope.top().pop();
+				}
 			}
 			break;
 
@@ -73,6 +96,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				strstack.pop();
 				right = intstack.top();
 				intstack.pop();
+				if (!vars.contain(var)) varscope.top().push(var);
 				vars.insert(var, right);
 				intstack.push(right);
 				// std::cout << var << " = " << right << '\n';
@@ -148,6 +172,7 @@ void IterRun::process(TriOperation* expr, char state) {
 }
 
 void IterRun::run(Expr* expr) {
+	varscope.push(std::stack<std::string>());
 	estack.push(ExprState(expr, 0));
 	while (!estack.empty()) {
 		ExprState curr = estack.top();

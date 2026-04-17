@@ -101,7 +101,7 @@ Expr* Parser::getTreeFromString(std::string str) {
 			}
 
 			if (checklast({LBRC, PROG, RBRC})) {
-				ParserToken tok = {PROG, scope[scope.size() - 2].expr};
+				ParserToken tok = {PROG, new UnOperation(OperationType::BLOCK ,scope[scope.size() - 2].expr)};
 				deletelast(3);
 				scope.push_back(tok);
 				continue;

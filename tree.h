@@ -8,6 +8,7 @@ enum class OperationType: int {
 	SEMI,
 	NOT, EQUAL, NEQUAL, LESS, GREATER, LEQUAL, GEQUAL,
 	WHILE, IF,
+	BLOCK,
 	PRINT,
 };
 
