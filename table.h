@@ -328,4 +328,10 @@ public:
 			node->field = onode->field;
 		}
 	}
+
+	void swap(TTable& other) {
+		KeyNode temp = root;
+		root = other.root;
+		other.root = temp;
+	}
 };
