@@ -146,7 +146,7 @@ class TTable {
 			addLeft(node);
 		}
 
-		KeyNode& next() {
+		KeyNode* next() {
 			if (nodes.empty()) throw -1;
 
 			KeyNode* node = nodes.top();
@@ -299,5 +299,33 @@ public:
 		if (!t) return 0;
 
 		return 1;
+	}
+
+	void refresh(TTable& other) {
+		TTableIter iter = this->iter();
+		TTableIter oiter = other.iter();
+
+		if (!iter.hasNext() || !oiter.hasNext()) return;
+
+		KeyNode* node = iter.next();
+		KeyNode* onode = oiter.next();
+
+		while (iter.hasNext() && oiter.hasNext()) {
+			int comp = compare(node->key, onode->key);
+
+			if (comp == 0) {
+				node->field = onode->field;
+				node = iter.next();
+				onode = oiter.next();
+				continue;
+			}
+
+			if (comp > 0) node = iter.next();
+			else onode = oiter.next();
+		}
+
+		if (compare(node->key, onode->key) == 0) {
+			node->field = onode->field;
+		}
 	}
 };
