@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <stack>
 #include <algorithm>
 
@@ -131,6 +132,36 @@ class TTable {
 		delete node;
 	}
 
+	class TTableIter {
+		std::stack<KeyNode*> nodes;
+	
+		void addLeft(KeyNode* node) {
+			while (node) {
+				nodes.push(node);
+				node = node->left;
+			}
+		}
+	public:
+		TTableIter(KeyNode* node) {
+			addLeft(node);
+		}
+
+		KeyNode& next() {
+			if (nodes.empty()) throw -1;
+
+			KeyNode* node = nodes.top();
+			nodes.pop();
+			
+			if (node->right) addLeft(node->right);
+
+			return node;
+		}
+
+		int hasNext() {
+			return !nodes.empty();
+		}
+	};
+
 public:
 	TTable(): root(nullptr) {
 	}
@@ -148,6 +179,10 @@ public:
 		clearTree(root);
 		root = copyTree(other.root);
 		return *this;
+	}
+
+	TTableIter iter() {
+		return TTableIter(root);
 	}
 
 	void insert(KeyType key, FieldType field) {
