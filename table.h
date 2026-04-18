@@ -13,7 +13,9 @@ class TTable {
 		int height;
 
 		KeyNode(KeyType _key, FieldType _field, KeyNode *_left = nullptr, KeyNode *_right = nullptr):
-			key(_key), field(_field), left(_left), right(_right) {}
+			key(_key), field(_field), left(_left), right(_right), height(0) {}
+		KeyNode(const KeyNode& copy):
+			key(copy.key), field(copy.field), left(copy.left), right(copy.right), height(copy.height) {}
 	};
 
 	int compare(KeyType &lkey, KeyType &rkey) {
@@ -113,8 +115,39 @@ class TTable {
 			}
 		}
 	}
+
+	KeyNode* copyTree(KeyNode* node) {
+		if (node == nullptr) return nullptr;
+		KeyNode* ret = new KeyNode(*node);
+		ret->left = copyTree(node->left);
+		ret->right = copytree(node->right);
+		return ret;
+	}
+
+	void clearTree(KeyNode* node) {
+		if (node == nullptr) return;
+		clearTree(node->left);
+		clearTree(node->right);
+		delete node;
+	}
+
 public:
 	TTable(): root(nullptr) {
+	}
+
+	~TTable() {
+		clearTree(root);
+	}
+
+	TTable(const TTable &copy) {
+		root = copyTree(copy.root);
+	}
+
+	TTable& operator= (const TTable& other) {
+		if (this == &other) return *this;
+		clearTree(root);
+		root = copyTree(other.root);
+		return *this;
 	}
 
 	void insert(KeyType key, FieldType field) {
