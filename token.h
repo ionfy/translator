@@ -2,7 +2,7 @@
 
 #include <string>
 
-enum class TokenType: int {VARIABLE, INTEGER, OPERATION, KEYWORD};
+enum class TokenType: int {VARIABLE, INTEGER, OPERATION, KEYWORD, DOUBLE};
 
 struct Token {
 	TokenType type;

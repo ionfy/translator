@@ -24,6 +24,7 @@ int Avt::getindex(char ch) {
 	if (ch == '0') return 3;
 	if (ch >= '1' && ch <= '9') return 4;
 	if (ch == ' ' || ch == '\n') return 5;
+	if (ch == '.') return 6;
 	return 0;
 }
 
@@ -57,6 +58,12 @@ void Avt::tokenstr(char ch) {
 
 void Avt::tokenint(char ch) {
 	tokens.push({TokenType::INTEGER, scope});
+	scope.clear();
+	if (getindex(ch) != 5) scope += ch;
+}
+
+void Avt::tokendbl(char ch) {
+	tokens.push({TokenType::DOUBLE, scope});
 	scope.clear();
 	if (getindex(ch) != 5) scope += ch;
 }
