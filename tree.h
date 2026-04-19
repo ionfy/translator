@@ -1,5 +1,6 @@
 #pragma once
 
+#include "table.h"
 #include <string>
 
 enum class OperationType: int {
@@ -8,6 +9,8 @@ enum class OperationType: int {
 	SEMI,
 	NOT, EQUAL, NEQUAL, LESS, GREATER, LEQUAL, GEQUAL,
 	WHILE, IF,
+	COMMA,
+	RETURN,
 	BLOCK,
 	PRINT,
 };
@@ -69,6 +72,27 @@ public:
 	Expr* getLeft();
 	Expr* getMidle();
 	Expr* getRight();
+	void process(IterRun *itr, char state) override;
+};
+
+class FunctionParam: public Expr {
+	Expr* expr;
+public:
+	FunctionParam(Expr* _expr): expr(_expr) {}
+	void process(IterRun *itr, char state) override;
+};
+
+class FunctionDef: public Expr {
+	Expr* name;
+	Expr* param;
+	Expr* body;
+	TTable<std::string, int> screen;
+public:
+	FunctionDef(Expr* _name, Expr* _param, Expr* _body): name(_name), param(_param), body(_body) {}
+	Expr* getName();
+	Expr* getParam();
+	Expr* getBody();
+	TTable<std::string, int>& getScreen();
 	void process(IterRun *itr, char state) override;
 };
 

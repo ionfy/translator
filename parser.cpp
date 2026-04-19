@@ -1,4 +1,6 @@
 #include "parser.h"
+#include <cstddef>
+#include <exception>
 #include <iostream>
 #include <queue>
 #include <string>
@@ -66,12 +68,15 @@ Parser::ParserToken Parser::gettoken(Token token) {
 		if (token.value == ">=") return {GEQUAL, nullptr};
 		if (token.value == "{") return {LBRC, nullptr};
 		if (token.value == "}") return {RBRC, nullptr};
+		if (token.value == ",") return {COMMA, nullptr};
 	case TokenType::KEYWORD:
 		if (token.value == "EOI") return {EOI, nullptr };
 		if (token.value == "while") return {WHILE, nullptr };
 		if (token.value == "if") return {IF, nullptr};
 		if (token.value == "else") return {ELSE, nullptr};
 		if (token.value == "print") return {PRINT, nullptr};
+		if (token.value == "fn") return {FUNCDEF, nullptr};
+		if (token.value == "return") return {RETURN, nullptr};
 	}
 	throw -1;
 }
@@ -85,6 +90,14 @@ Expr* Parser::getTreeFromString(std::string str) {
 		ParserToken ptk = gettoken(tokens.front());
 		tokens.pop();
 		while (1) {
+			if (checklast({FUNCDEF, VAR, LPRNT, PARAM, RPRNT, PROG})) {
+				ParserToken tok = {PROG, new FunctionDef(
+						scope[scope.size() - 5].expr, scope[scope.size() - 3].expr, scope[scope.size() - 1].expr)};
+				deletelast(6);
+				scope.push_back(tok);
+				continue;
+			}
+
 			if (checklast({IF, EXPR, PROG, ELSE, PROG})) {
 				ParserToken tok = {PROG, new TriOperation(OperationType::IF,
 						scope[scope.size() - 4].expr, scope[scope.size() - 3].expr, scope[scope.size() - 1].expr)};
@@ -103,6 +116,20 @@ Expr* Parser::getTreeFromString(std::string str) {
 			if (checklast({LBRC, PROG, RBRC})) {
 				ParserToken tok = {PROG, new UnOperation(OperationType::BLOCK ,scope[scope.size() - 2].expr)};
 				deletelast(3);
+				scope.push_back(tok);
+				continue;
+			}
+
+			if (checklast({PARAM, COMMA, EXPR})) {
+				ParserToken tok = {PARAM, new BiOperation(OperationType::COMMA, scope[scope.size() - 3].expr, new FunctionParam(scope[scope.size() - 1].expr))};
+				deletelast(3);
+				scope.push_back(tok);
+				continue;
+			}
+
+			if (checklast({VAR, LPRNT, EXPR})) {
+				ParserToken tok = {PARAM, new FunctionParam(scope[scope.size() - 1].expr)};
+				deletelast(1);
 				scope.push_back(tok);
 				continue;
 			}
@@ -162,6 +189,10 @@ Expr* Parser::getTreeFromString(std::string str) {
 				deletelast(2);
 				scope.push_back(tok);
 				continue;
+			}
+
+			if (checklast({VAR}) && ptk.type == LPRNT) {
+				break;
 			}
 
 			if (checklast({VAR}) && ptk.type == ASSIGN) {

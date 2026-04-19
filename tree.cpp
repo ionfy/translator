@@ -61,3 +61,23 @@ Expr* TriOperation::getRight() {
 void TriOperation::process(IterRun *itr, char state) {
 	itr->process(this, state);
 }
+
+void FunctionParam::process(IterRun*itr, char state) {
+	itr->process(this, state);
+}
+
+Expr* FunctionDef::getName() {
+	return name;
+}
+Expr* FunctionDef::getParam() {
+	return param;
+}
+Expr* FunctionDef::getBody() {
+	return body;
+}
+TTable<std::string, int>& FunctionDef::getScreen() {
+	return screen;
+}
+void FunctionDef::process(IterRun*itr, char state) {
+	itr->process(this, state);
+}

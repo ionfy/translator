@@ -19,6 +19,7 @@ class Parser {
 		WHILE,
 		IF, ELSE,
 		PRINT,
+		FUNC, FUNCDEF, RETURN, PARAM, COMMA,
 		EXPR, PROG, EOI};
 
 	struct ParserToken {

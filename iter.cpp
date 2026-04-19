@@ -143,6 +143,14 @@ void IterRun::process(BiOperation* expr, char state) {
 				while (!intstack.empty()) intstack.pop();
 			}
 			break;
+
+		case OperationType::COMMA:
+			if (state == 0) {
+				estack.push(ExprState(expr->getRight()));
+				estack.push(ExprState(expr->getLeft()));
+			}
+			break;
+
 		default: throw -1;
 	}
 }
@@ -168,6 +176,31 @@ void IterRun::process(TriOperation* expr, char state) {
 			}
 			break;
 		default: throw -1;
+	}
+}
+
+void IterRun::process(FunctionParam* expr, char state) {
+	if (state == 0) {
+		int ccount = intstack.top();
+		intstack.pop();
+		intstack.push(ccount + 1);
+	}
+}
+
+void IterRun::process(FunctionDef* expr, char state) {
+	if (state == 0) {
+		expr->getScreen() = vars;
+		estack.push(ExprState(expr, 1));
+		estack.push(ExprState(expr->getName(), 1));
+		intstack.push(0);
+		estack.push(ExprState(expr->getParam()));
+	}
+	else {
+		std::string name = strstack.top();
+		strstack.pop();
+		char count = intstack.top();
+		intstack.pop();
+		functions.insert({name, count}, expr);
 	}
 }
 

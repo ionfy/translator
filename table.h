@@ -121,7 +121,7 @@ class TTable {
 		if (node == nullptr) return nullptr;
 		KeyNode* ret = new KeyNode(*node);
 		ret->left = copyTree(node->left);
-		ret->right = copytree(node->right);
+		ret->right = copyTree(node->right);
 		return ret;
 	}
 

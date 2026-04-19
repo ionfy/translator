@@ -4,7 +4,7 @@
 
 int iskeyword(std::string str) {
 	if (str == "while" || str == "if" || str == "else" ||
-			str == "print") return 1;
+			str == "print" || str == "fn" || str == "return") return 1;
 	return 0;
 }
 
@@ -20,7 +20,7 @@ int Avt::getindex(char ch) {
 		ch == '/' || ch == '=' || ch == ';' ||
 		ch == '(' || ch == ')' || ch == '!' ||
 		ch == '<' || ch == '>' || ch == '{' ||
-		ch == '}' ) return 2;
+		ch == '}' || ch == ',') return 2;
 	if (ch == '0') return 3;
 	if (ch >= '1' && ch <= '9') return 4;
 	if (ch == ' ' || ch == '\n') return 5;
