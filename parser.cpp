@@ -74,6 +74,8 @@ Parser::ParserToken Parser::gettoken(Token token) {
 	switch (token.type) {
 	case TokenType::INTEGER:
 		return {INT, new RawVal(Type(Types::INT, stringtoint(token.value)))};
+	case TokenType::DOUBLE:
+		return {DOUBLE, new RawVal(Type(Types::DOUBLE, stringtodouble(token.value)))};
 	case TokenType::VARIABLE:
 		return {VAR, new Var(token.value)};
 	case TokenType::OPERATION:
@@ -247,6 +249,13 @@ Expr* Parser::getTreeFromString(std::string str) {
 			if (checklast({VAR})) {
 				ParserToken tok;
 				tok = {EXPR, scope[scope.size() - 1].expr};
+				deletelast(1);
+				scope.push_back(tok);
+				continue;
+			}
+
+			if (checklast({DOUBLE})) {
+				ParserToken tok = {EXPR, scope[scope.size() - 1].expr};
 				deletelast(1);
 				scope.push_back(tok);
 				continue;

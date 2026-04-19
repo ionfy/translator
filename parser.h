@@ -9,7 +9,7 @@
 class Parser {
 	enum ParserType: int {
 		VAR,
-		INT,
+		INT, DOUBLE,
 		ASSIGN,
 		SEMI,
 		ADD, SUB, MUL, DIV,
