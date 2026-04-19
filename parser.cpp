@@ -125,7 +125,7 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
-			if (checklast({LVAR, ASSIGN, EXPR}) && lesspriority(ASSIGN, ptk.type)) {
+			if (checklast({VAR, ASSIGN, EXPR}) && lesspriority(ASSIGN, ptk.type)) {
 				ParserToken tok = {EXPR, new BiOperation(OperationType::ASSIGN,
 						scope[scope.size() - 3].expr, scope[scope.size() - 1].expr)};
 				deletelast(3);
@@ -164,12 +164,13 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
+			if (checklast({VAR}) && ptk.type == ASSIGN) {
+				break;
+			}
+
 			if (checklast({VAR})) {
 				ParserToken tok;
-				if (ptk.type == ASSIGN)
-					tok = {LVAR, scope[scope.size() - 1].expr};
-				else
-					tok = {EXPR, scope[scope.size() - 1].expr};
+				tok = {EXPR, scope[scope.size() - 1].expr};
 				deletelast(1);
 				scope.push_back(tok);
 				continue;
