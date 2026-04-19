@@ -35,7 +35,7 @@ class RawVal: public Expr {
 	Type val;
 public:
 	RawVal(Type _val): val(_val) {}
-	RawVal getVal();
+	Type getVal();
 	void process(IterRun *itr, char state) override;
 };
 
