@@ -106,6 +106,18 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
+			if (checklast({FUNCDEF, VAR, LPRNT, PARAM, RPRNT })) {
+				break;
+			}
+
+			if (checklast({VAR, LPRNT, PARAM, RPRNT})) {
+				ParserToken tok = {EXPR, new FunctionCall(
+						scope[scope.size() - 4].expr, scope[scope.size() - 2].expr)};
+				deletelast(4);
+				scope.push_back(tok);
+				continue;
+			}
+
 			if (checklast({LPRNT, EXPR, RPRNT})) {
 				ParserToken tok = {EXPR, scope[scope.size() - 2].expr};
 				deletelast(3);
@@ -130,6 +142,14 @@ Expr* Parser::getTreeFromString(std::string str) {
 			if (checklast({VAR, LPRNT, EXPR})) {
 				ParserToken tok = {PARAM, new FunctionParam(scope[scope.size() - 1].expr)};
 				deletelast(1);
+				scope.push_back(tok);
+				continue;
+			}
+
+			if (checklast({RETURN, EXPR, SEMI})) {
+				ParserToken tok = {PROG, new UnOperation(OperationType::RETURN,
+						scope[scope.size() - 2].expr)};
+				deletelast(3);
 				scope.push_back(tok);
 				continue;
 			}

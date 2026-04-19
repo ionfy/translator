@@ -79,6 +79,7 @@ class FunctionParam: public Expr {
 	Expr* expr;
 public:
 	FunctionParam(Expr* _expr): expr(_expr) {}
+	Expr* getExpr();
 	void process(IterRun *itr, char state) override;
 };
 
@@ -93,6 +94,39 @@ public:
 	Expr* getParam();
 	Expr* getBody();
 	TTable<std::string, int>& getScreen();
+	void process(IterRun *itr, char state) override;
+};
+
+struct FuncDesc {
+	std::string name;
+	char pcount;
+
+	int operator== (const FuncDesc& other) {
+		return name == other.name && pcount == other.pcount;
+	}
+
+	int operator< (const FuncDesc& other) {
+		if (name != other.name) return name < other.name;
+		return pcount < other.pcount;
+	}
+
+	int operator> (const FuncDesc& other) {
+		if (name != other.name) return name > other.name;
+		return pcount > other.pcount;
+	}
+};
+
+class FunctionCall: public Expr {
+	Expr* name;
+	Expr* param;
+	FuncDesc desc;
+	TTable<std::string, int> temp;
+public:
+	FunctionCall(Expr* _name, Expr* _param): name(_name), param(_param) {}
+	Expr* getName();
+	Expr* getParam();
+	FuncDesc& getDesc();
+	TTable<std::string, int>& getTemp();
 	void process(IterRun *itr, char state) override;
 };
 

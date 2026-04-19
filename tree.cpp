@@ -62,6 +62,9 @@ void TriOperation::process(IterRun *itr, char state) {
 	itr->process(this, state);
 }
 
+Expr* FunctionParam::getExpr() {
+	return expr;
+}
 void FunctionParam::process(IterRun*itr, char state) {
 	itr->process(this, state);
 }
@@ -81,3 +84,20 @@ TTable<std::string, int>& FunctionDef::getScreen() {
 void FunctionDef::process(IterRun*itr, char state) {
 	itr->process(this, state);
 }
+
+Expr* FunctionCall::getName() {
+	return name;
+}
+Expr* FunctionCall::getParam() {
+	return param;
+}
+FuncDesc& FunctionCall::getDesc() {
+	return desc;
+}
+TTable<std::string, int>& FunctionCall::getTemp() {
+	return temp;
+}
+void FunctionCall::process(IterRun*itr, char state) {
+	itr->process(this, state);
+}
+

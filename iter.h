@@ -11,25 +11,6 @@ struct ExprState {
 	ExprState(Expr* _expr, char _state = 0): expr(_expr), state(_state) {}
 };
 
-struct FuncDesc {
-	std::string name;
-	char pcount;
-
-	int operator== (const FuncDesc& other) {
-		return name == other.name && pcount == other.pcount;
-	}
-
-	int operator< (const FuncDesc& other) {
-		if (name != other.name) return name < other.name;
-		return pcount < other.pcount;
-	}
-
-	int operator> (const FuncDesc& other) {
-		if (name != other.name) return name > other.name;
-		return pcount > other.pcount;
-	}
-};
-
 class IterRun {
 	std::stack<ExprState> estack;
 	TTable<std::string, int> vars;
@@ -37,6 +18,7 @@ class IterRun {
 	std::stack<int> intstack;
 	std::stack<std::string> strstack;
 	TTable<FuncDesc, Expr*> functions;
+	std::stack<ExprState*> ret;
 public:
 	void process(Var* expr, char state);
 	void process(Number* expr, char state);
@@ -45,5 +27,6 @@ public:
 	void process(TriOperation* expr, char state);
 	void process(FunctionParam* expr, char state);
 	void process(FunctionDef* expr, char state);
+	void process(FunctionCall* expr, char state);
 	void run(Expr* expr);
 };

@@ -16,39 +16,6 @@ int main() {
 	//IterRun r;
 	//r.run(top);
 	//
-	TTable<int, int> tbl;
-	tbl.insert(1, 10);
-	tbl.insert(2, 10);
-	tbl.insert(3, 10);
-	tbl.insert(4, 10);
-	tbl.insert(5, 10);
-
-	TTable<int, int> tbl2;
-	tbl2.insert(1, 1);
-	tbl2.insert(232, 1);
-	tbl2.insert(123, 1);
-	tbl2.insert(124, 1);
-	tbl2.insert(123, 1);
-	tbl2.insert(0, 1);
-	tbl2.insert(2, 1);
-	tbl2.insert(3, 1);
-	tbl2.insert(4, 1);
-
-	std::cout << tbl.get(1) << std::endl;
-	std::cout << tbl.get(2) << std::endl;
-	std::cout << tbl.get(3) << std::endl;
-	std::cout << tbl.get(4) << std::endl;
-	std::cout << tbl.get(5) << std::endl;
-
-	tbl.refresh(tbl2);
-
-	std::cout << tbl.get(1) << std::endl;
-	std::cout << tbl.get(2) << std::endl;
-	std::cout << tbl.get(3) << std::endl;
-	std::cout << tbl.get(4) << std::endl;
-	std::cout << tbl.get(5) << std::endl;
-
-
 
 	std::ifstream file("../code.txt");
 

@@ -330,7 +330,7 @@ public:
 	}
 
 	void swap(TTable& other) {
-		KeyNode temp = root;
+		KeyNode* temp = root;
 		root = other.root;
 		other.root = temp;
 	}
