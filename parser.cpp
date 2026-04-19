@@ -5,6 +5,7 @@
 #include <queue>
 #include <string>
 #include "lexer.h"
+#include "stypes.h"
 #include "tree.h"
 
 #define SIMPLEOPERATION(ptype)                                          \
@@ -14,6 +15,30 @@ if (checklast({EXPR, ptype, EXPR}) && lesspriority(ptype, ptk.type)) {  \
 	deletelast(3);                                                        \
 	scope.push_back(tok);                                                 \
 	continue;                                                             \
+}
+
+int stringtoint(std::string str) {
+	int ret = 0;
+	for (char ch: str) {
+		ret *= 10;
+		ret += ch - '0';
+	}
+	return ret;
+}
+
+double stringtodouble(std::string str) {
+	double ret = 0;
+	long long point = 0;
+	for (char ch: str) {
+		if (ch == '.') {
+			point = 1;
+			continue;
+		}
+		if (point) point *= 10;
+		ret *= 10;
+		ret += ch - '0';
+	}
+	return ret / point;
 }
 
 int Parser::getpriority(ParserType type) {
@@ -48,7 +73,7 @@ void Parser::deletelast(int count) {
 Parser::ParserToken Parser::gettoken(Token token) {
 	switch (token.type) {
 	case TokenType::INTEGER:
-		return {INT, new Number(token.value)};
+		return {INT, new RawVal(Type(Types::INT, stringtoint(token.value)))};
 	case TokenType::VARIABLE:
 		return {VAR, new Var(token.value)};
 	case TokenType::OPERATION:

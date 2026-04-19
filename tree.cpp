@@ -9,17 +9,10 @@ void Var::process(IterRun *itr, char state) {
 	itr->process(this, state);
 }
 
-Number::Number(std::string _val) {
-	val = 0;
-	for (char ch: _val) {
-		val *= 10;
-		val += ch - '0';
-	}
-}
-int Number::getVal() {
+Type RawVal::getVal() {
 	return val;
 }
-void Number::process(IterRun *itr, char state) {
+void RawVal::process(IterRun *itr, char state) {
 	itr->process(this, state);
 }
 

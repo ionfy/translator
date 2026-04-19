@@ -21,7 +21,7 @@ class IterRun {
 	std::stack<ExprState*> ret;
 public:
 	void process(Var* expr, char state);
-	void process(Number* expr, char state);
+	void process(RawVal* expr, char state);
 	void process(UnOperation* expr, char state);
 	void process(BiOperation* expr, char state);
 	void process(TriOperation* expr, char state);

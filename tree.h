@@ -1,6 +1,7 @@
 #pragma once
 
 #include "table.h"
+#include "stypes.h"
 #include <string>
 
 enum class OperationType: int {
@@ -30,12 +31,11 @@ public:
 	void process(IterRun *itr, char state) override;
 };
 
-class Number: public Expr {
-	int val;
+class RawVal: public Expr {
+	Type val;
 public:
-	Number(int _val): val(_val) {}
-	Number(std::string _val);
-	int getVal();
+	RawVal(Type _val): val(_val) {}
+	RawVal getVal();
 	void process(IterRun *itr, char state) override;
 };
 

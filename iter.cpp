@@ -36,7 +36,7 @@ void IterRun::process(Var* expr, char state) {
 	else strstack.push(expr->getVal());
 }
 
-void IterRun::process(Number* expr, char state) {
+void IterRun::process(RawVal* expr, char state) {
 	intstack.push(expr->getVal());
 }
 
