@@ -14,8 +14,10 @@ case OperationType::type:                            \
 		estack.push(ExprState(expr->getLeft()));     \
 	}                                                \
 	else {                                           \
+		if (intstack.empty()) throw -1;              \
 		right = intstack.top();                      \
 		intstack.pop();                              \
+		if (intstack.empty()) throw -1;              \
 		left = intstack.top();                       \
 		intstack.pop();                              \
 		intstack.push(left op right);                \
@@ -47,6 +49,7 @@ void IterRun::process(UnOperation* expr, char state) {
 				estack.push(ExprState(expr->getNext()));
 			}
 			else {
+				if (intstack.empty()) throw - 1;
 				next = intstack.top();
 				intstack.pop();
 				std::cout << next << std::endl;
@@ -72,7 +75,11 @@ void IterRun::process(UnOperation* expr, char state) {
 				estack.push(ExprState(expr, 1));
 				estack.push(ExprState(expr->getNext()));
 			}
-			else while (&(estack.top()) != ret.top()) estack.pop();
+			else {
+				while (&(estack.top()) != ret.top()) {
+					estack.pop();
+				}
+			}
 			break;
 
 		default: throw -1;
@@ -103,6 +110,7 @@ void IterRun::process(BiOperation* expr, char state) {
 			else {
 				var = strstack.top();
 				strstack.pop();
+				if (intstack.empty()) throw - 1;
 				right = intstack.top();
 				intstack.pop();
 				if (!vars.contain(var)) varscope.top().push(var);
@@ -118,6 +126,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				estack.push(ExprState(expr->getLeft()));
 			}
 			else if (state == 1) {
+				if (intstack.empty()) throw - 1;
 				left = intstack.top();
 				intstack.pop();
 				if (left) {
@@ -133,6 +142,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				estack.push(ExprState(expr->getLeft()));
 			}
 			else if (state == 1) {
+				if (intstack.empty()) throw - 1;
 				left = intstack.top();
 				intstack.pop();
 				if (left) {
@@ -182,6 +192,7 @@ void IterRun::process(TriOperation* expr, char state) {
 				estack.push(ExprState(expr->getLeft()));
 			}
 			else if (state == 1) {
+				if (intstack.empty()) throw - 1;
 				left = intstack.top();
 				intstack.pop();
 				if (left) {
@@ -198,6 +209,7 @@ void IterRun::process(TriOperation* expr, char state) {
 
 void IterRun::process(FunctionParam* expr, char state) {
 	if (state == 0) { // число
+		if (intstack.empty()) throw - 1;
 		int ccount = intstack.top();
 		intstack.pop();
 		intstack.push(ccount + 1);
@@ -210,6 +222,7 @@ void IterRun::process(FunctionParam* expr, char state) {
 		estack.push(ExprState(expr->getExpr(), 1));
 	}
 	else { // = параметр
+		if (intstack.empty()) throw - 1;
 		int val = intstack.top();
 		intstack.pop();
 		std::string name = strstack.top();
@@ -239,7 +252,6 @@ void IterRun::process(FunctionDef* expr, char state) {
 	else if (state == 3) {
 		estack.push(ExprState(expr, 4));
 		ret.push(&(estack.top()));
-
 		estack.push(ExprState(expr->getBody()));
 		estack.push(ExprState(expr->getParam(), 2));
 	}
@@ -282,6 +294,7 @@ void IterRun::process(FunctionCall* expr, char state) {
 	else {
 		vars.swap(expr->getTemp());
 		vars.refresh(expr->getTemp());
+		ret.pop();
 	}
 }
 
