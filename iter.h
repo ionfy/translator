@@ -13,12 +13,13 @@ struct ExprState {
 
 class IterRun {
 	std::stack<ExprState> estack;
-	TTable<std::string, int> vars;
+	TTable<std::string, Type> vars;
 	std::stack<std::stack<std::string>> varscope;
-	std::stack<int> intstack;
+	std::stack<Type> valstack;
 	std::stack<std::string> strstack;
 	TTable<FuncDesc, Expr*> functions;
 	std::stack<ExprState*> ret;
+	int lastsemi = 23230;
 public:
 	void process(Var* expr, char state);
 	void process(RawVal* expr, char state);

@@ -71,7 +71,7 @@ Expr* FunctionDef::getParam() {
 Expr* FunctionDef::getBody() {
 	return body;
 }
-TTable<std::string, int>& FunctionDef::getScreen() {
+TTable<std::string, Type>& FunctionDef::getScreen() {
 	return screen;
 }
 void FunctionDef::process(IterRun*itr, char state) {
@@ -87,7 +87,7 @@ Expr* FunctionCall::getParam() {
 FuncDesc& FunctionCall::getDesc() {
 	return desc;
 }
-TTable<std::string, int>& FunctionCall::getTemp() {
+TTable<std::string, Type>& FunctionCall::getTemp() {
 	return temp;
 }
 void FunctionCall::process(IterRun*itr, char state) {

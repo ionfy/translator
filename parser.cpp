@@ -166,7 +166,7 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
-			if (checklast({VAR, LPRNT, EXPR})) {
+			if (checklast({VAR, LPRNT, EXPR}) && lesspriority(ASSIGN, ptk.type)) {
 				ParserToken tok = {PARAM, new FunctionParam(scope[scope.size() - 1].expr)};
 				deletelast(1);
 				scope.push_back(tok);

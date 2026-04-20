@@ -1,4 +1,5 @@
 #include "iter.h"
+#include "stypes.h"
 #include "table.h"
 #include "tree.h"
 #include <cmath>
@@ -6,28 +7,68 @@
 #include <stack>
 #include <string>
 
-#define SIMPLEOPERATION(type, op)                    \
-case OperationType::type:                            \
-	if (state == 0) {                                \
+#define ASIMPLEOPERATION(optype, op)               \
+case OperationType::optype:                        \
+	if (state == 0) {                              \
 		estack.push(ExprState(expr, 1));             \
 		estack.push(ExprState(expr->getRight()));    \
 		estack.push(ExprState(expr->getLeft()));     \
-	}                                                \
-	else {                                           \
-		if (intstack.empty()) throw -1;              \
-		right = intstack.top();                      \
-		intstack.pop();                              \
-		if (intstack.empty()) throw -1;              \
-		left = intstack.top();                       \
-		intstack.pop();                              \
-		intstack.push(left op right);                \
-	}                                                \
+	}                                              \
+	else {                                         \
+		if (valstack.empty()) throw -1;              \
+		right = valstack.top();                      \
+		valstack.pop();                              \
+		if (valstack.empty()) throw -1;              \
+		left = valstack.top();                       \
+		valstack.pop();                              \
+		if (left.type == Types::INT && right.type == Types::INT) \
+			valstack.push(Type(Types::INT,\
+						std::get<int>(left.val) op std::get<int>(right.val)));       \
+		if (left.type == Types::INT && right.type == Types::DOUBLE) \
+			valstack.push(Type(Types::DOUBLE,\
+						std::get<int>(left.val) op std::get<double>(right.val)));       \
+		if (left.type == Types::DOUBLE && right.type == Types::INT) \
+			valstack.push(Type(Types::DOUBLE,\
+						std::get<double>(left.val) op std::get<int>(right.val)));       \
+		if (left.type == Types::DOUBLE && right.type == Types::DOUBLE) \
+			valstack.push(Type(Types::DOUBLE,\
+						std::get<double>(left.val) op std::get<double>(right.val)));       \
+	}                                              \
+	break;
+
+#define BSIMPLEOPERATION(optype, op)               \
+case OperationType::optype:                        \
+	if (state == 0) {                              \
+		estack.push(ExprState(expr, 1));             \
+		estack.push(ExprState(expr->getRight()));    \
+		estack.push(ExprState(expr->getLeft()));     \
+	}                                              \
+	else {                                         \
+		if (valstack.empty()) throw -1;              \
+		right = valstack.top();                      \
+		valstack.pop();                              \
+		if (valstack.empty()) throw -1;              \
+		left = valstack.top();                       \
+		valstack.pop();                              \
+		if (left.type == Types::INT && right.type == Types::INT) \
+			valstack.push(Type(Types::INT,\
+						std::get<int>(left.val) op std::get<int>(right.val)));       \
+		if (left.type == Types::INT && right.type == Types::DOUBLE) \
+			valstack.push(Type(Types::INT,\
+						std::get<int>(left.val) op std::get<double>(right.val)));       \
+		if (left.type == Types::DOUBLE && right.type == Types::INT) \
+			valstack.push(Type(Types::INT,\
+						std::get<double>(left.val) op std::get<int>(right.val)));       \
+		if (left.type == Types::DOUBLE && right.type == Types::DOUBLE) \
+			valstack.push(Type(Types::INT,\
+						std::get<double>(left.val) op std::get<double>(right.val)));       \
+	}                                              \
 	break;
 
 void IterRun::process(Var* expr, char state) {
 	if (state == 0) {
 		if (vars.contain(expr->getVal()))
-			intstack.push(vars.get(expr->getVal()));
+			valstack.push(vars.get(expr->getVal()));
 		else {
 			std::cerr << "Used undeclared var: " << expr->getVal() << std::endl;
 			throw -1;
@@ -37,11 +78,11 @@ void IterRun::process(Var* expr, char state) {
 }
 
 void IterRun::process(RawVal* expr, char state) {
-	intstack.push(expr->getVal());
+	valstack.push(expr->getVal());
 }
 
 void IterRun::process(UnOperation* expr, char state) {
-	int next;
+	Type next;
 	switch (expr->getOp()) {
 		case OperationType::PRINT:
 			if (state == 0) {
@@ -49,10 +90,24 @@ void IterRun::process(UnOperation* expr, char state) {
 				estack.push(ExprState(expr->getNext()));
 			}
 			else {
-				if (intstack.empty()) throw - 1;
-				next = intstack.top();
-				intstack.pop();
-				std::cout << next << std::endl;
+				if (valstack.empty()) throw - 1;
+				next = valstack.top();
+				valstack.pop();
+				switch (next.type) {
+				case Types::NONE:
+					std::cout << "None" << std::endl;
+					break;
+				case Types::INT:
+					std::cout << std::get<int>(next.val) << std::endl;
+					break;
+				case Types::DOUBLE:
+					std::cout << std::get<double>(next.val) << std::endl;
+					break;
+				case Types::STRING:
+					std::cout << std::get<std::string>(next.val) << std::endl;
+					break;
+				default: throw -1;
+				}
 			}
 			break;
 
@@ -87,19 +142,19 @@ void IterRun::process(UnOperation* expr, char state) {
 }
 
 void IterRun::process(BiOperation* expr, char state) {
-	int left, right;
+	Type left, right;
 	std::string var;
 
 	switch (expr->getOp()) {
-		SIMPLEOPERATION(ADD, +)
-		SIMPLEOPERATION(SUB, -)
-		SIMPLEOPERATION(MUL, *)
-		SIMPLEOPERATION(DIV, /)
-		SIMPLEOPERATION(EQUAL, ==)
-		SIMPLEOPERATION(LESS, <)
-		SIMPLEOPERATION(GREATER, >)
-		SIMPLEOPERATION(LEQUAL, <=)
-		SIMPLEOPERATION(GEQUAL, >=)
+		ASIMPLEOPERATION(ADD, +)
+		ASIMPLEOPERATION(SUB, -)
+		ASIMPLEOPERATION(MUL, *)
+		ASIMPLEOPERATION(DIV, /)
+		BSIMPLEOPERATION(EQUAL, ==)
+		BSIMPLEOPERATION(LESS, <)
+		BSIMPLEOPERATION(GREATER, >)
+		BSIMPLEOPERATION(LEQUAL, <=)
+		BSIMPLEOPERATION(GEQUAL, >=)
 
 		case OperationType::ASSIGN:
 			if (state == 0) {
@@ -110,12 +165,12 @@ void IterRun::process(BiOperation* expr, char state) {
 			else {
 				var = strstack.top();
 				strstack.pop();
-				if (intstack.empty()) throw - 1;
-				right = intstack.top();
-				intstack.pop();
+				if (valstack.empty()) throw - 1;
+				right = valstack.top();
+				valstack.pop();
 				if (!vars.contain(var)) varscope.top().push(var);
 				vars.insert(var, right);
-				intstack.push(right);
+				valstack.push(right);
 				// std::cout << var << " = " << right << '\n';
 			}
 			break;
@@ -126,10 +181,13 @@ void IterRun::process(BiOperation* expr, char state) {
 				estack.push(ExprState(expr->getLeft()));
 			}
 			else if (state == 1) {
-				if (intstack.empty()) throw - 1;
-				left = intstack.top();
-				intstack.pop();
-				if (left) {
+				if (valstack.empty()) throw - 1;
+				left = valstack.top();
+				valstack.pop();
+				int flag = 0;
+				if (left.type == Types::INT) flag = (0 != std::get<int>(left.val));
+				if (left.type == Types::DOUBLE) flag = (0 != std::get<double>(left.val));
+				if (flag) {
 					estack.push(ExprState(expr, 0));
 					estack.push(ExprState(expr->getRight()));
 				}
@@ -142,10 +200,13 @@ void IterRun::process(BiOperation* expr, char state) {
 				estack.push(ExprState(expr->getLeft()));
 			}
 			else if (state == 1) {
-				if (intstack.empty()) throw - 1;
-				left = intstack.top();
-				intstack.pop();
-				if (left) {
+				if (valstack.empty()) throw - 1;
+				left = valstack.top();
+				valstack.pop();
+				int flag = 0;
+				if (left.type == Types::INT) flag = (0 != std::get<int>(left.val));
+				if (left.type == Types::DOUBLE) flag = (0 != std::get<double>(left.val));
+				if (flag) {
 					estack.push(ExprState(expr->getRight()));
 				}
 			}
@@ -153,13 +214,13 @@ void IterRun::process(BiOperation* expr, char state) {
 
 		case OperationType::SEMI:
 			if (state == 0) {
+				lastsemi = valstack.size();
 				estack.push(ExprState(expr->getRight()));
 				estack.push(ExprState(expr, 1));
 				estack.push(ExprState(expr->getLeft()));
-				estack.push(ExprState(expr, 1));
 			}
 			else {
-				while (!intstack.empty()) intstack.pop();
+				while (valstack.size() > lastsemi) valstack.pop();
 			}
 			break;
 
@@ -183,7 +244,7 @@ void IterRun::process(BiOperation* expr, char state) {
 }
 
 void IterRun::process(TriOperation* expr, char state) {
-	int left, midle, right;
+	Type left, midle, right;
 
 	switch (expr->getOp()) {
 		case OperationType::IF:
@@ -192,10 +253,13 @@ void IterRun::process(TriOperation* expr, char state) {
 				estack.push(ExprState(expr->getLeft()));
 			}
 			else if (state == 1) {
-				if (intstack.empty()) throw - 1;
-				left = intstack.top();
-				intstack.pop();
-				if (left) {
+				if (valstack.empty()) throw - 1;
+				left = valstack.top();
+				valstack.pop();
+				int flag = 0;
+				if (left.type == Types::INT) flag = (0 != std::get<int>(left.val));
+				if (left.type == Types::DOUBLE) flag = (0 != std::get<double>(left.val));
+				if (flag) {
 					estack.push(ExprState(expr->getMidle()));
 				}
 				else {
@@ -209,10 +273,10 @@ void IterRun::process(TriOperation* expr, char state) {
 
 void IterRun::process(FunctionParam* expr, char state) {
 	if (state == 0) { // число
-		if (intstack.empty()) throw - 1;
-		int ccount = intstack.top();
-		intstack.pop();
-		intstack.push(ccount + 1);
+		if (valstack.empty()) throw - 1;
+		int ccount = std::get<int>(valstack.top().val);
+		valstack.pop();
+		valstack.push(Type(Types::INT, ccount + 1));
 	}
 	else if (state == 1) { // знач
 		estack.push(ExprState(expr->getExpr()));
@@ -222,9 +286,9 @@ void IterRun::process(FunctionParam* expr, char state) {
 		estack.push(ExprState(expr->getExpr(), 1));
 	}
 	else { // = параметр
-		if (intstack.empty()) throw - 1;
-		int val = intstack.top();
-		intstack.pop();
+		if (valstack.empty()) throw - 1;
+		Type val = valstack.top();
+		valstack.pop();
 		std::string name = strstack.top();
 		strstack.pop();
 		vars.insert(name, val);
@@ -236,14 +300,14 @@ void IterRun::process(FunctionDef* expr, char state) {
 		expr->getScreen() = vars;
 		estack.push(ExprState(expr, 1));
 		estack.push(ExprState(expr->getName(), 1));
-		intstack.push(0);
+		valstack.push(Type(Types::INT, 0));
 		estack.push(ExprState(expr->getParam()));
 	}
 	else if (state == 1) {
 		std::string name = strstack.top();
 		strstack.pop();
-		char count = intstack.top();
-		intstack.pop();
+		char count = std::get<int>(valstack.top().val);
+		valstack.pop();
 		functions.insert({name, count}, expr);
 	}
 	else if (state == 2) {
@@ -265,14 +329,14 @@ void IterRun::process(FunctionCall* expr, char state) {
 	if (state == 0) {
 		estack.push(ExprState(expr, 1));
 		estack.push(ExprState(expr->getName(), 1));
-		intstack.push(0);
+		valstack.push(Type(Types::INT, 0));
 		estack.push(ExprState(expr->getParam()));
 	}
 	else if (state == 1) {
 		std::string name = strstack.top();
 		strstack.pop();
-		char count = intstack.top();
-		intstack.pop();
+		char count = std::get<int>(valstack.top().val);
+		valstack.pop();
 		if (!functions.contain({name, count})) {
 			std::cout << "Used undeclared function " << name << " with " << (int)count << " arguments" << std::endl;
 			throw -1;

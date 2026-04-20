@@ -87,13 +87,13 @@ class FunctionDef: public Expr {
 	Expr* name;
 	Expr* param;
 	Expr* body;
-	TTable<std::string, int> screen;
+	TTable<std::string, Type> screen;
 public:
 	FunctionDef(Expr* _name, Expr* _param, Expr* _body): name(_name), param(_param), body(_body) {}
 	Expr* getName();
 	Expr* getParam();
 	Expr* getBody();
-	TTable<std::string, int>& getScreen();
+	TTable<std::string, Type>& getScreen();
 	void process(IterRun *itr, char state) override;
 };
 
@@ -120,13 +120,13 @@ class FunctionCall: public Expr {
 	Expr* name;
 	Expr* param;
 	FuncDesc desc;
-	TTable<std::string, int> temp;
+	TTable<std::string, Type> temp;
 public:
 	FunctionCall(Expr* _name, Expr* _param): name(_name), param(_param) {}
 	Expr* getName();
 	Expr* getParam();
 	FuncDesc& getDesc();
-	TTable<std::string, int>& getTemp();
+	TTable<std::string, Type>& getTemp();
 	void process(IterRun *itr, char state) override;
 };
 
