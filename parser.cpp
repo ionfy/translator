@@ -73,11 +73,14 @@ void Parser::deletelast(int count) {
 Parser::ParserToken Parser::gettoken(Token token) {
 	switch (token.type) {
 	case TokenType::INTEGER:
-		return {INT, new RawVal(Type(Types::INT, stringtoint(token.value)))};
+		return {INT, new RawVal(Type(stringtoint(token.value)))};
+		break;
 	case TokenType::DOUBLE:
-		return {DOUBLE, new RawVal(Type(Types::DOUBLE, stringtodouble(token.value)))};
+		return {DOUBLE, new RawVal(Type(stringtodouble(token.value)))};
+		break;
 	case TokenType::VARIABLE:
 		return {VAR, new Var(token.value)};
+		break;
 	case TokenType::OPERATION:
 		if (token.value == "(") return {LPRNT, nullptr};
 		if (token.value == ")") return {RPRNT, nullptr};
@@ -96,6 +99,7 @@ Parser::ParserToken Parser::gettoken(Token token) {
 		if (token.value == "{") return {LBRC, nullptr};
 		if (token.value == "}") return {RBRC, nullptr};
 		if (token.value == ",") return {COMMA, nullptr};
+		break;
 	case TokenType::KEYWORD:
 		if (token.value == "EOI") return {EOI, nullptr };
 		if (token.value == "while") return {WHILE, nullptr };
@@ -104,6 +108,7 @@ Parser::ParserToken Parser::gettoken(Token token) {
 		if (token.value == "print") return {PRINT, nullptr};
 		if (token.value == "fn") return {FUNCDEF, nullptr};
 		if (token.value == "return") return {RETURN, nullptr};
+		break;
 	}
 	throw -1;
 }

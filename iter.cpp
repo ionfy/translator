@@ -23,11 +23,9 @@ case OperationType::optype:                        \
 		valstack.pop();                              \
 		if (!left.is_numeric() || !right.is_numeric()) throw -1; \
 		if (left.get_type() == Types::DOUBLE || right.get_type() == Types::DOUBLE) \
-			valstack.push(Type(Types::DOUBLE,\
-						left.to_double() op right.to_double()));       \
+			valstack.push(Type(left.to_double() op right.to_double()));       \
 		else \
-			valstack.push(Type(Types::INT,\
-						left.to_int() op right.to_int())); \
+			valstack.push(Type(left.to_int() op right.to_int())); \
 	}                                              \
 	break;
 
@@ -45,8 +43,10 @@ case OperationType::optype:                        \
 		if (valstack.empty()) throw -1;              \
 		left = valstack.top();                       \
 		valstack.pop();                              \
-		valstack.push(Type(Types::BOOL,\
-					left.to_bool() op right.to_bool()));       \
+		if (left.get_type() == Types::DOUBLE || right.get_type() == Types::DOUBLE) \
+			valstack.push(Type(left.to_double() op right.to_double()));       \
+		else \
+			valstack.push(Type(left.to_int() op right.to_int())); \
 	}                                              \
 	break;
 
@@ -116,6 +116,7 @@ void IterRun::process(BiOperation* expr, char state) {
 	std::string var;
 
 	switch (expr->getOp()) {
+
 		ASIMPLEOPERATION(ADD, +)
 		ASIMPLEOPERATION(SUB, -)
 		ASIMPLEOPERATION(MUL, *)
@@ -238,7 +239,7 @@ void IterRun::process(FunctionParam* expr, char state) {
 		if (valstack.empty()) throw - 1;
 		int ccount = valstack.top().to_int();
 		valstack.pop();
-		valstack.push(Type(Types::INT, ccount + 1));
+		valstack.push(Type(ccount + 1));
 	}
 	else if (state == 1) { // знач
 		estack.push(ExprState(expr->getExpr()));
@@ -264,7 +265,7 @@ void IterRun::process(FunctionDef* expr, char state) {
 		expr->getScreen() = vars;
 		estack.push(ExprState(expr, 1));
 		estack.push(ExprState(expr->getName(), 1));
-		valstack.push(Type(Types::INT, 0));
+		valstack.push(Type(0));
 		estack.push(ExprState(expr->getParam()));
 	}
 	else if (state == 1) {
@@ -302,7 +303,7 @@ void IterRun::process(FunctionCall* expr, char state) {
 	if (state == 0) {
 		estack.push(ExprState(expr, 1));
 		estack.push(ExprState(expr->getName(), 1));
-		valstack.push(Type(Types::INT, 0));
+		valstack.push(Type(0));
 		estack.push(ExprState(expr->getParam()));
 	}
 	else {

@@ -11,10 +11,10 @@ class Type {
 	std::string string_val = "";
 public:
 	Type(): type(Types::NONE) {};
-	Type(Types _type, bool _val) : type(_type), bool_val(_val) {}
-	Type(Types _type, int _val): type(_type), int_val(_val) {}
-	Type(Types _type, double _val): type(_type), double_val(_val) {}
-	Type(Types _type, std::string _val): type(_type), string_val(_val) {}
+	Type(bool _val) : type(Types::BOOL), bool_val(_val) {}
+	Type(int _val): type(Types::INT), int_val(_val) {}
+	Type(double _val): type(Types::DOUBLE), double_val(_val) {}
+	Type(std::string _val): type(Types::STRING), string_val(_val) {}
 
 	Types get_type();
 
