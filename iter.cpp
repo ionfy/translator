@@ -67,8 +67,8 @@ case OperationType::optype:                        \
 
 void IterRun::process(Var* expr, char state) {
 	if (state == 0) {
-		if (vars.contain(expr->getVal()))
-			valstack.push(vars.get(expr->getVal()));
+		if (vars->contain(expr->getVal()))
+			valstack.push(vars->get(expr->getVal()));
 		else {
 			std::cerr << "Used undeclared var: " << expr->getVal() << std::endl;
 			throw -1;
@@ -113,16 +113,14 @@ void IterRun::process(UnOperation* expr, char state) {
 
 		case OperationType::BLOCK:
 			if (state == 0) {
-				varscope.push(std::stack<std::string>());
+				vars = new MemNodeT(vars);
 				estack.push(ExprState(expr, 1));
 				estack.push(ExprState(expr->getNext()));
 			}
 			else {
-				while (!varscope.top().empty()) {
-					vars.remove(varscope.top().top());
-					varscope.top().pop();
-				}
-				varscope.pop();
+				MemNodeT* node = vars;
+				vars = vars->get_parent();
+				delete node;
 			}
 			break;
 		
@@ -169,8 +167,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				if (valstack.empty()) throw - 1;
 				right = valstack.top();
 				valstack.pop();
-				if (!vars.contain(var)) varscope.top().push(var);
-				vars.insert(var, right);
+				vars->insert(var, right);
 				valstack.push(right);
 				// std::cout << var << " = " << right << '\n';
 			}
@@ -289,12 +286,13 @@ void IterRun::process(FunctionParam* expr, char state) {
 	}
 	else { // = параметр
 		if (valstack.empty()) throw - 1;
+
 		Type val = valstack.top();
 		valstack.pop();
 		std::string name = strstack.top();
 		strstack.pop();
-		vars.insert(name, val);
-		varscope.top().push(name);
+
+		vars->insert_last(name, val);
 	}
 }
 
@@ -314,17 +312,26 @@ void IterRun::process(FunctionDef* expr, char state) {
 		functions.insert({name, count}, expr);
 	}
 	else if (state == 2) {
-		vars = expr->getScreen();
-	}
-	else if (state == 3) {
-		estack.push(ExprState(expr, 4));
+		retvars.push(vars);
+
+		vars = new MemNodeT(expr->getScreen());
+
+		estack.push(ExprState(expr, 3));
 		ret.push(&(estack.top()));
+
 		estack.push(ExprState(expr->getBody()));
 		estack.push(ExprState(expr->getParam(), 2));
 	}
 	else {
-		expr->getScreen().refresh(vars);
-		vars = expr->getScreen();
+		while (vars != expr->getScreen()) {
+			MemNodeT* node = vars;
+			vars = vars->get_parent();
+			delete node;
+		}
+		vars = retvars.top();
+		retvars.pop();
+
+		ret.pop();
 	}
 }
 
@@ -335,7 +342,7 @@ void IterRun::process(FunctionCall* expr, char state) {
 		valstack.push(Type(Types::INT, 0));
 		estack.push(ExprState(expr->getParam()));
 	}
-	else if (state == 1) {
+	else {
 		std::string name = strstack.top();
 		strstack.pop();
 		char count = std::get<int>(valstack.top().val);
@@ -344,31 +351,13 @@ void IterRun::process(FunctionCall* expr, char state) {
 			std::cout << "Used undeclared function " << name << " with " << (int)count << " arguments" << std::endl;
 			throw -1;
 		}
-		expr->getDesc() = {name, count};
-		estack.push(ExprState(expr, 2));
+
+		estack.push(ExprState(functions.get({name, count}), 2));
 		estack.push(ExprState(expr->getParam(), 1));
-	}
-	else if (state == 2) {
-		tempvars.push(TTable<std::string, Type>());
-		vars.swap(tempvars.top());
-		estack.push(ExprState(expr, 3));
-		estack.push(ExprState(functions.get(expr->getDesc()), 2));
-	}
-	else if (state == 3) {
-		vars.refresh(tempvars.top());
-		estack.push(ExprState(expr, 4));
-		estack.push(ExprState(functions.get(expr->getDesc()), 3));
-	}
-	else {
-		vars.swap(tempvars.top());
-		vars.refresh(tempvars.top());
-		tempvars.pop();
-		ret.pop();
 	}
 }
 
 void IterRun::run(Expr* expr) {
-	varscope.push(std::stack<std::string>());
 	estack.push(ExprState(expr, 0));
 	while (!estack.empty()) {
 		ExprState curr = estack.top();

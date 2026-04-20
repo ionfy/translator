@@ -1,3 +1,6 @@
+#pragma once
+
+#include "stypes.h"
 #include "table.h"
 
 template <typename KeyType, typename FieldType>
@@ -6,6 +9,7 @@ class MemNode {
 	MemNode* parent;
 public:
 	MemNode(): table(), parent(nullptr) {}
+	MemNode(MemNode* node): table(), parent(node) {}
 
 	void insert(KeyType key, FieldType field) {
 		MemNode* curr = this;
@@ -26,7 +30,7 @@ public:
 		while (!(curr || curr->table.contain(key)))
 			curr = curr->parent;
 		if (curr) {
-			curr->table.get(key);
+			return curr->table.get(key);
 		}
 		else throw -2;
 	}
@@ -41,19 +45,9 @@ public:
 		else return 0;
 	}
 
-	void create() {
-		MemNode* node = new MemNode();
-		node->table.swap(table);
-		node->parent = parent;
-		parent = node;
-	}
-
-	void drop() {
-		if (!parent) throw -1;
-		MemNode* node = parent;
-		node->table.swap(table);
-		parent = node->parent;
-		delete node;
+	MemNode* get_parent() {
+		return parent;
 	}
 };
 
+using MemNodeT = MemNode<std::string, Type>;

@@ -117,6 +117,14 @@ Expr* Parser::getTreeFromString(std::string str) {
 		ParserToken ptk = gettoken(tokens.front());
 		tokens.pop();
 		while (1) {
+			if (checklast({ FUNCDEF, VAR, LPRNT, PARAM, RPRNT, LBRC, PROG, RBRC })) {
+				ParserToken tok = { PROG, new FunctionDef(
+						scope[scope.size() - 7].expr, scope[scope.size() - 5].expr, scope[scope.size() - 2].expr) };
+				deletelast(8);
+				scope.push_back(tok);
+				continue;
+			}
+
 			if (checklast({FUNCDEF, VAR, LPRNT, PARAM, RPRNT, PROG})) {
 				ParserToken tok = {PROG, new FunctionDef(
 						scope[scope.size() - 5].expr, scope[scope.size() - 3].expr, scope[scope.size() - 1].expr)};

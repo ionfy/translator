@@ -71,7 +71,7 @@ Expr* FunctionDef::getParam() {
 Expr* FunctionDef::getBody() {
 	return body;
 }
-TTable<std::string, Type>& FunctionDef::getScreen() {
+MemNodeT*& FunctionDef::getScreen() {
 	return screen;
 }
 void FunctionDef::process(IterRun*itr, char state) {
@@ -83,9 +83,6 @@ Expr* FunctionCall::getName() {
 }
 Expr* FunctionCall::getParam() {
 	return param;
-}
-FuncDesc& FunctionCall::getDesc() {
-	return desc;
 }
 void FunctionCall::process(IterRun*itr, char state) {
 	itr->process(this, state);
