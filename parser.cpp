@@ -117,13 +117,6 @@ Expr* Parser::getTreeFromString(std::string str) {
 		ParserToken ptk = gettoken(tokens.front());
 		tokens.pop();
 		while (1) {
-			if (checklast({ FUNCDEF, VAR, LPRNT, PARAM, RPRNT, LBRC, PROG, RBRC })) {
-				ParserToken tok = { PROG, new FunctionDef(
-						scope[scope.size() - 7].expr, scope[scope.size() - 5].expr, scope[scope.size() - 2].expr) };
-				deletelast(8);
-				scope.push_back(tok);
-				continue;
-			}
 
 			if (checklast({FUNCDEF, VAR, LPRNT, PARAM, RPRNT, PROG})) {
 				ParserToken tok = {PROG, new FunctionDef(
@@ -135,7 +128,8 @@ Expr* Parser::getTreeFromString(std::string str) {
 
 			if (checklast({IF, EXPR, PROG, ELSE, PROG})) {
 				ParserToken tok = {PROG, new TriOperation(OperationType::IF,
-						scope[scope.size() - 4].expr, scope[scope.size() - 3].expr, scope[scope.size() - 1].expr)};
+						scope[scope.size() - 4].expr, new UnOperation(OperationType::BLOCK, scope[scope.size() - 3].expr),
+					new UnOperation(OperationType::BLOCK, scope[scope.size() - 1].expr))};
 				deletelast(5);
 				scope.push_back(tok);
 				continue;
@@ -217,7 +211,7 @@ Expr* Parser::getTreeFromString(std::string str) {
 
 			if (checklast({IF, EXPR, PROG}) && ptk.type != ELSE) {
 				ParserToken tok = {PROG, new BiOperation(OperationType::IF,
-						scope[scope.size() - 2].expr, scope[scope.size() - 1].expr)};
+						scope[scope.size() - 2].expr, new UnOperation(OperationType::BLOCK, scope[scope.size() - 1].expr))};
 				deletelast(3);
 				scope.push_back(tok);
 				continue;

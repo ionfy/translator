@@ -13,7 +13,7 @@ public:
 
 	void insert(KeyType key, FieldType field) {
 		MemNode* curr = this;
-		while (!(curr || curr->table.contain(key)))
+		while (curr && !curr->table.contain(key))
 			curr = curr->parent;
 		if (curr) {
 			curr->table.insert(key, field);
@@ -27,7 +27,7 @@ public:
 
 	FieldType get(KeyType key) {
 		MemNode* curr = this;
-		while (!(curr || curr->table.contain(key)))
+		while (curr && !curr->table.contain(key))
 			curr = curr->parent;
 		if (curr) {
 			return curr->table.get(key);
