@@ -21,18 +21,13 @@ case OperationType::optype:                        \
 		if (valstack.empty()) throw -1;              \
 		left = valstack.top();                       \
 		valstack.pop();                              \
-		if (left.type == Types::INT && right.type == Types::INT) \
+		if (!left.is_numeric() || !right.is_numeric()) throw -1; \
+		if (left.get_type() == Types::DOUBLE || right.get_type() == Types::DOUBLE) \
+			valstack.push(Type(Types::DOUBLE,\
+						left.to_double() op right.to_double()));       \
+		else \
 			valstack.push(Type(Types::INT,\
-						std::get<int>(left.val) op std::get<int>(right.val)));       \
-		if (left.type == Types::INT && right.type == Types::DOUBLE) \
-			valstack.push(Type(Types::DOUBLE,\
-						std::get<int>(left.val) op std::get<double>(right.val)));       \
-		if (left.type == Types::DOUBLE && right.type == Types::INT) \
-			valstack.push(Type(Types::DOUBLE,\
-						std::get<double>(left.val) op std::get<int>(right.val)));       \
-		if (left.type == Types::DOUBLE && right.type == Types::DOUBLE) \
-			valstack.push(Type(Types::DOUBLE,\
-						std::get<double>(left.val) op std::get<double>(right.val)));       \
+						left.to_int() op right.to_int())); \
 	}                                              \
 	break;
 
@@ -50,18 +45,8 @@ case OperationType::optype:                        \
 		if (valstack.empty()) throw -1;              \
 		left = valstack.top();                       \
 		valstack.pop();                              \
-		if (left.type == Types::INT && right.type == Types::INT) \
-			valstack.push(Type(Types::INT,\
-						std::get<int>(left.val) op std::get<int>(right.val)));       \
-		if (left.type == Types::INT && right.type == Types::DOUBLE) \
-			valstack.push(Type(Types::INT,\
-						std::get<int>(left.val) op std::get<double>(right.val)));       \
-		if (left.type == Types::DOUBLE && right.type == Types::INT) \
-			valstack.push(Type(Types::INT,\
-						std::get<double>(left.val) op std::get<int>(right.val)));       \
-		if (left.type == Types::DOUBLE && right.type == Types::DOUBLE) \
-			valstack.push(Type(Types::INT,\
-						std::get<double>(left.val) op std::get<double>(right.val)));       \
+		valstack.push(Type(Types::BOOL,\
+					left.to_bool() op right.to_bool()));       \
 	}                                              \
 	break;
 
@@ -93,21 +78,7 @@ void IterRun::process(UnOperation* expr, char state) {
 				if (valstack.empty()) throw - 1;
 				next = valstack.top();
 				valstack.pop();
-				switch (next.type) {
-				case Types::NONE:
-					std::cout << "None" << std::endl;
-					break;
-				case Types::INT:
-					std::cout << std::get<int>(next.val) << std::endl;
-					break;
-				case Types::DOUBLE:
-					std::cout << std::get<double>(next.val) << std::endl;
-					break;
-				case Types::STRING:
-					std::cout << std::get<std::string>(next.val) << std::endl;
-					break;
-				default: throw -1;
-				}
+				std::cout << next.to_string() << std::endl;
 			}
 			break;
 
@@ -167,6 +138,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				if (valstack.empty()) throw - 1;
 				right = valstack.top();
 				valstack.pop();
+
 				vars->insert(var, right);
 				valstack.push(right);
 				// std::cout << var << " = " << right << '\n';
@@ -182,10 +154,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				if (valstack.empty()) throw - 1;
 				left = valstack.top();
 				valstack.pop();
-				int flag = 0;
-				if (left.type == Types::INT) flag = (0 != std::get<int>(left.val));
-				if (left.type == Types::DOUBLE) flag = (0 != std::get<double>(left.val));
-				if (flag) {
+				if (left.to_bool()) {
 					estack.push(ExprState(expr, 0));
 					estack.push(ExprState(expr->getRight()));
 				}
@@ -201,10 +170,7 @@ void IterRun::process(BiOperation* expr, char state) {
 				if (valstack.empty()) throw - 1;
 				left = valstack.top();
 				valstack.pop();
-				int flag = 0;
-				if (left.type == Types::INT) flag = (0 != std::get<int>(left.val));
-				if (left.type == Types::DOUBLE) flag = (0 != std::get<double>(left.val));
-				if (flag) {
+				if (left.to_bool()) {
 					estack.push(ExprState(expr->getRight()));
 				}
 			}
@@ -255,10 +221,7 @@ void IterRun::process(TriOperation* expr, char state) {
 				if (valstack.empty()) throw - 1;
 				left = valstack.top();
 				valstack.pop();
-				int flag = 0;
-				if (left.type == Types::INT) flag = (0 != std::get<int>(left.val));
-				if (left.type == Types::DOUBLE) flag = (0 != std::get<double>(left.val));
-				if (flag) {
+				if (left.to_bool()) {
 					estack.push(ExprState(expr->getMidle()));
 				}
 				else {
@@ -273,7 +236,7 @@ void IterRun::process(TriOperation* expr, char state) {
 void IterRun::process(FunctionParam* expr, char state) {
 	if (state == 0) { // число
 		if (valstack.empty()) throw - 1;
-		int ccount = std::get<int>(valstack.top().val);
+		int ccount = valstack.top().to_int();
 		valstack.pop();
 		valstack.push(Type(Types::INT, ccount + 1));
 	}
@@ -307,7 +270,7 @@ void IterRun::process(FunctionDef* expr, char state) {
 	else if (state == 1) {
 		std::string name = strstack.top();
 		strstack.pop();
-		char count = std::get<int>(valstack.top().val);
+		char count = valstack.top().to_int();
 		valstack.pop();
 		functions.insert({name, count}, expr);
 	}
@@ -345,7 +308,7 @@ void IterRun::process(FunctionCall* expr, char state) {
 	else {
 		std::string name = strstack.top();
 		strstack.pop();
-		char count = std::get<int>(valstack.top().val);
+		char count = valstack.top().to_int();
 		valstack.pop();
 		if (!functions.contain({name, count})) {
 			std::cout << "Used undeclared function " << name << " with " << (int)count << " arguments" << std::endl;
