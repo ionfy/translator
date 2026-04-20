@@ -20,6 +20,7 @@ class IterRun {
 	std::stack<std::string> strstack;
 	TTable<FuncDesc, Expr*> functions;
 	std::stack<ExprState*> ret;
+	int lastsemi = 0;
 public:
 	void process(Var* expr, char state);
 	void process(RawVal* expr, char state);

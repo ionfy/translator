@@ -215,13 +215,14 @@ void IterRun::process(BiOperation* expr, char state) {
 
 		case OperationType::SEMI:
 			if (state == 0) {
+				lastsemi = valstack.size();
 				estack.push(ExprState(expr->getRight()));
-				// estack.push(ExprState(expr, 1));
+				estack.push(ExprState(expr, 1));
 				estack.push(ExprState(expr->getLeft()));
-				// estack.push(ExprState(expr, 1));
+				estack.push(ExprState(expr, 1));
 			}
 			else {
-				while (!valstack.empty()) valstack.pop();
+				while (valstack.size() > lastsemi) valstack.pop();
 			}
 			break;
 
