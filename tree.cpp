@@ -87,9 +87,6 @@ Expr* FunctionCall::getParam() {
 FuncDesc& FunctionCall::getDesc() {
 	return desc;
 }
-TTable<std::string, Type>& FunctionCall::getTemp() {
-	return temp;
-}
 void FunctionCall::process(IterRun*itr, char state) {
 	itr->process(this, state);
 }

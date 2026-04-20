@@ -122,6 +122,7 @@ void IterRun::process(UnOperation* expr, char state) {
 					vars.remove(varscope.top().top());
 					varscope.top().pop();
 				}
+				varscope.pop();
 			}
 			break;
 		
@@ -214,13 +215,13 @@ void IterRun::process(BiOperation* expr, char state) {
 
 		case OperationType::SEMI:
 			if (state == 0) {
-				lastsemi = valstack.size();
 				estack.push(ExprState(expr->getRight()));
-				estack.push(ExprState(expr, 1));
+				// estack.push(ExprState(expr, 1));
 				estack.push(ExprState(expr->getLeft()));
+				// estack.push(ExprState(expr, 1));
 			}
 			else {
-				while (valstack.size() > lastsemi) valstack.pop();
+				while (!valstack.empty()) valstack.pop();
 			}
 			break;
 
@@ -292,6 +293,7 @@ void IterRun::process(FunctionParam* expr, char state) {
 		std::string name = strstack.top();
 		strstack.pop();
 		vars.insert(name, val);
+		varscope.top().push(name);
 	}
 }
 
@@ -346,18 +348,20 @@ void IterRun::process(FunctionCall* expr, char state) {
 		estack.push(ExprState(expr->getParam(), 1));
 	}
 	else if (state == 2) {
-		expr->getTemp().swap(vars);
+		tempvars.push(TTable<std::string, Type>());
+		vars.swap(tempvars.top());
 		estack.push(ExprState(expr, 3));
 		estack.push(ExprState(functions.get(expr->getDesc()), 2));
 	}
 	else if (state == 3) {
-		vars.refresh(expr->getTemp());
+		vars.refresh(tempvars.top());
 		estack.push(ExprState(expr, 4));
 		estack.push(ExprState(functions.get(expr->getDesc()), 3));
 	}
 	else {
-		vars.swap(expr->getTemp());
-		vars.refresh(expr->getTemp());
+		vars.swap(tempvars.top());
+		vars.refresh(tempvars.top());
+		tempvars.pop();
 		ret.pop();
 	}
 }
