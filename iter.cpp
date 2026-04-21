@@ -7,7 +7,7 @@
 #include <stack>
 #include <string>
 
-#define ASIMPLEOPERATION(optype, op)               \
+#define SIMPLEOPERATION(optype, op)               \
 case OperationType::optype:                        \
 	if (state == 0) {                              \
 		estack.push(ExprState(expr, 1));             \
@@ -21,32 +21,7 @@ case OperationType::optype:                        \
 		if (valstack.empty()) throw -1;              \
 		left = valstack.top();                       \
 		valstack.pop();                              \
-		if (!left.is_numeric() || !right.is_numeric()) throw -1; \
-		if (left.get_type() == Types::DOUBLE || right.get_type() == Types::DOUBLE) \
-			valstack.push(Type(left.to_double() op right.to_double()));       \
-		else \
-			valstack.push(Type(left.to_int() op right.to_int())); \
-	}                                              \
-	break;
-
-#define BSIMPLEOPERATION(optype, op)               \
-case OperationType::optype:                        \
-	if (state == 0) {                              \
-		estack.push(ExprState(expr, 1));             \
-		estack.push(ExprState(expr->getRight()));    \
-		estack.push(ExprState(expr->getLeft()));     \
-	}                                              \
-	else {                                         \
-		if (valstack.empty()) throw -1;              \
-		right = valstack.top();                      \
-		valstack.pop();                              \
-		if (valstack.empty()) throw -1;              \
-		left = valstack.top();                       \
-		valstack.pop();                              \
-		if (left.get_type() == Types::DOUBLE || right.get_type() == Types::DOUBLE) \
-			valstack.push(Type(left.to_double() op right.to_double()));       \
-		else \
-			valstack.push(Type(left.to_int() op right.to_int())); \
+		valstack.push(Type(left op right)); \
 	}                                              \
 	break;
 
@@ -117,15 +92,15 @@ void IterRun::process(BiOperation* expr, char state) {
 
 	switch (expr->getOp()) {
 
-		ASIMPLEOPERATION(ADD, +)
-		ASIMPLEOPERATION(SUB, -)
-		ASIMPLEOPERATION(MUL, *)
-		ASIMPLEOPERATION(DIV, /)
-		BSIMPLEOPERATION(EQUAL, ==)
-		BSIMPLEOPERATION(LESS, <)
-		BSIMPLEOPERATION(GREATER, >)
-		BSIMPLEOPERATION(LEQUAL, <=)
-		BSIMPLEOPERATION(GEQUAL, >=)
+		SIMPLEOPERATION(ADD, +)
+		SIMPLEOPERATION(SUB, -)
+		SIMPLEOPERATION(MUL, *)
+		SIMPLEOPERATION(DIV, /)
+		SIMPLEOPERATION(EQUAL, ==)
+		SIMPLEOPERATION(LESS, <)
+		SIMPLEOPERATION(GREATER, >)
+		SIMPLEOPERATION(LEQUAL, <=)
+		SIMPLEOPERATION(GEQUAL, >=)
 
 		case OperationType::ASSIGN:
 			if (state == 0) {

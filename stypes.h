@@ -16,12 +16,25 @@ public:
 	Type(double _val): type(Types::DOUBLE), double_val(_val) {}
 	Type(std::string _val): type(Types::STRING), string_val(_val) {}
 
-	Types get_type();
+	Types get_type() const;
 
-	bool is_numeric();
-	bool to_bool();
-	int to_int();
-	double to_double();
-	std::string to_string();
+	bool is_numeric() const;
+	bool to_bool() const;
+	int to_int() const;
+	double to_double() const;
+	std::string to_string() const;
+
+	Type operator+(const Type& other) const;
+	Type operator-(const Type& other) const;
+	Type operator*(const Type& other) const;
+	Type operator/(const Type& other) const;
+
+	Type operator!() const;
+	Type operator==(const Type& other) const;
+	Type operator!=(const Type& other) const;
+	Type operator<(const Type& other) const;
+	Type operator<=(const Type& other) const;
+	Type operator>(const Type& other) const;
+	Type operator>=(const Type& other) const;
 };
 
