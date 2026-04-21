@@ -46,10 +46,6 @@ std::string Type::to_string() const {
 	throw -1;
 }
 
-Type Type::operator!() const {
-	return Type(!to_bool());
-}
-
 Type Type::operator+(const Type& other) const {
 	if (type == Types::STRING || other.type == Types::STRING)
 		return Type(to_string()+other.to_string());
@@ -86,6 +82,10 @@ Type Type::operator/(const Type& other) const {
 		return Type(to_int() / other.to_int());
 	}
 	throw - 1;
+}
+
+Type Type::operator!() const {
+	return Type(!to_bool());
 }
 
 Type Type::operator==(const Type& other) const {

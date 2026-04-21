@@ -241,6 +241,14 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
+			if (checklast({NOT, EXPR})) {
+				ParserToken tok = {EXPR, new UnOperation(OperationType::NOT,
+						scope[scope.size() - 1].expr)};
+				deletelast(2);
+				scope.push_back(tok);
+				continue;
+			}
+
 			if (checklast({EXPR, SEMI})) {
 				ParserToken tok = {PROG, scope[scope.size() - 2].expr};
 				deletelast(2);

@@ -7,8 +7,8 @@
 #include <stack>
 #include <string>
 
-#define SIMPLEOPERATION(optype, op)               \
-case OperationType::optype:                        \
+#define SIMPLEOPERATION(optype, op)              \
+case OperationType::optype:                      \
 	if (state == 0) {                              \
 		estack.push(ExprState(expr, 1));             \
 		estack.push(ExprState(expr->getRight()));    \
@@ -21,7 +21,7 @@ case OperationType::optype:                        \
 		if (valstack.empty()) throw -1;              \
 		left = valstack.top();                       \
 		valstack.pop();                              \
-		valstack.push(Type(left op right)); \
+		valstack.push(left op right);                \
 	}                                              \
 	break;
 
@@ -79,6 +79,19 @@ void IterRun::process(UnOperation* expr, char state) {
 				while (&(estack.top()) != ret.top()) {
 					estack.pop();
 				}
+			}
+			break;
+
+		case OperationType::NOT:
+			if (state == 0) {
+				estack.push(ExprState(expr, 1));
+				estack.push(ExprState(expr->getNext()));
+			}
+			else {
+				if (valstack.empty()) throw - 1;
+				next = valstack.top();
+				valstack.pop();
+				valstack.push(!next);
 			}
 			break;
 
