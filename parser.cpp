@@ -73,10 +73,13 @@ void Parser::deletelast(int count) {
 Parser::ParserToken Parser::gettoken(Token token) {
 	switch (token.type) {
 	case TokenType::INTEGER:
-		return {INT, new RawVal(Type(stringtoint(token.value)))};
+		return {RAW, new RawVal(Type(stringtoint(token.value)))};
 		break;
 	case TokenType::DOUBLE:
-		return {DOUBLE, new RawVal(Type(stringtodouble(token.value)))};
+		return {RAW, new RawVal(Type(stringtodouble(token.value)))};
+		break;
+	case TokenType::STRING:
+		return {RAW, new RawVal(Type(token.value))};
 		break;
 	case TokenType::VARIABLE:
 		return {VAR, new Var(token.value)};
@@ -261,14 +264,7 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
-			if (checklast({DOUBLE})) {
-				ParserToken tok = {EXPR, scope[scope.size() - 1].expr};
-				deletelast(1);
-				scope.push_back(tok);
-				continue;
-			}
-
-			if (checklast({INT})) {
+			if (checklast({RAW})) {
 				ParserToken tok = {EXPR, scope[scope.size() - 1].expr};
 				deletelast(1);
 				scope.push_back(tok);

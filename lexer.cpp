@@ -25,6 +25,7 @@ int Avt::getindex(char ch) {
 	if (ch >= '1' && ch <= '9') return 4;
 	if (ch == ' ' || ch == '\n') return 5;
 	if (ch == '.') return 6;
+	if (ch == '"') return 7;
 	return 0;
 }
 
@@ -81,6 +82,11 @@ void Avt::tokenopr(char ch) {
 		scope.clear();
 		if (getindex(ch) != 5) scope += ch;
 	}
+}
+
+void Avt::tokentxt(char ch) {
+	tokens.push({TokenType::STRING, scope});
+	scope.clear();
 }
 
 void Avt::skipchar(char ch) {}

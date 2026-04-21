@@ -14,9 +14,10 @@
 #define tkprn &Avt::tokenprn
 #define tkopr &Avt::tokenopr
 #define skpch &Avt::skipchar
+#define tktxt &Avt::tokentxt
 
 class Avt {
-	enum State: int {START = 0, STR, ZERO, INT, OP, ERR, DOUBLE};
+	enum State: int {START = 0, STR, ZERO, INT, OP, ERR, DOUBLE, TEXT};
 	
 	int row, col;
 	std::string scope;
@@ -33,27 +34,30 @@ class Avt {
 	void clrscope(char ch);
 	void tokenopr(char ch);
 	void skipchar(char ch);
+	void tokentxt(char ch);
 	
-	State transitions[7][7] = {
-		//err    a-z     op      0       1-9     \n      .
-		{START,  STR,    OP,     ZERO,   INT,    START,  DOUBLE},//START
-		{STR,    STR,    OP,     STR,    STR,    START,  ERR},//STR
-		{ZERO,   ERR,    OP,     ERR,    ERR,    START,  DOUBLE},//ZERO
-		{INT,    ERR,    OP,     INT,    INT,    START,  DOUBLE},//INT
-		{OP,     STR,    OP,     ZERO,   INT,    START,  DOUBLE},//OP
-		{ERR,    ERR,    OP,     ERR,    ERR,    START,  ERR},//ERR
-		{DOUBLE, ERR,    OP,     DOUBLE, DOUBLE, START,  ERR},//DOUBLE
+	State transitions[8][8] = {
+		//err    a-z     op      0       1-9     \n      .       "
+		{START,  STR,    OP,     ZERO,   INT,    START,  DOUBLE, TEXT,},//START
+		{STR,    STR,    OP,     STR,    STR,    START,  ERR,    ERR,},//STR
+		{ZERO,   ERR,    OP,     ERR,    ERR,    START,  DOUBLE, ERR,},//ZERO
+		{INT,    ERR,    OP,     INT,    INT,    START,  DOUBLE, ERR,},//INT
+		{OP,     STR,    OP,     ZERO,   INT,    START,  DOUBLE, TEXT,},//OP
+		{ERR,    ERR,    OP,     ERR,    ERR,    START,  ERR,    ERR,},//ERR
+		{DOUBLE, ERR,    OP,     DOUBLE, DOUBLE, START,  ERR,    ERR,},//DOUBLE
+		{TEXT,   TEXT,   TEXT,   TEXT,   TEXT,   TEXT,   TEXT,   START},//TEXT
 	};
 
-	void (Avt::*funcs[7][7])(char) = {
-		//err   a-z    op     0      1-9    \n     .
-		{skpch, addsc, addsc, addsc, addsc, clrsc, addsc},//START
-		{skpch, addsc, tkstr, addsc, addsc, tkstr, addsc},//STR
-		{skpch, addsc, tkint, addsc, addsc, tkint, addsc},//ZERO
-		{skpch, addsc, tkint, addsc, addsc, tkint, addsc},//INT
-		{skpch, tkopr, tkopr, tkopr, tkopr, tkopr, tkopr},//OP
-		{addsc, addsc, adder, addsc, addsc, adder, addsc},//ERR
-		{skpch, addsc, tkdbl, addsc, addsc, tkdbl, addsc},//DOUBLE
+	void (Avt::*funcs[8][8])(char) = {
+		//err   a-z    op     0      1-9    \n     .      "
+		{skpch, addsc, addsc, addsc, addsc, clrsc, addsc, skpch, },//START
+		{skpch, addsc, tkstr, addsc, addsc, tkstr, addsc, addsc, },//STR
+		{skpch, addsc, tkint, addsc, addsc, tkint, addsc, addsc, },//ZERO
+		{skpch, addsc, tkint, addsc, addsc, tkint, addsc, addsc, },//INT
+		{skpch, tkopr, tkopr, tkopr, tkopr, tkopr, tkopr, tkopr, },//OP
+		{addsc, addsc, adder, addsc, addsc, adder, addsc, addsc, },//ERR
+		{skpch, addsc, tkdbl, addsc, addsc, tkdbl, addsc, addsc, },//DOUBLE
+		{addsc, addsc, addsc, addsc, addsc, addsc, addsc, tktxt, },//TEXT
 	};
 
 public:
@@ -71,5 +75,5 @@ public:
 #undef tkprn
 #undef tkopr
 #undef skpch
-
+#undef tktxt
 
