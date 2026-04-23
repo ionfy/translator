@@ -17,7 +17,6 @@ class IterRun {
 	MemNodeT* vars;
 	std::stack<Type> valstack;
 	std::stack<std::string> strstack;
-	TTable<FuncDesc, Expr*> functions;
 	std::stack<ExprState*> ret;
 	std::stack<MemNodeT*> retvars;
 	int lastsemi = 0;

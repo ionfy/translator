@@ -261,7 +261,7 @@ void IterRun::process(FunctionDef* expr, char state) {
 		strstack.pop();
 		char count = valstack.top().to_int();
 		valstack.pop();
-		functions.insert({name, count}, expr);
+		vars->insert(name, Type(expr, count));
 	}
 	else if (state == 2) {
 		retvars.push(vars);
@@ -299,12 +299,12 @@ void IterRun::process(FunctionCall* expr, char state) {
 		strstack.pop();
 		char count = valstack.top().to_int();
 		valstack.pop();
-		if (!functions.contain({name, count})) {
+		if (!(vars->contain(name) && vars->get(name).get_type() == Types::FUNCTION && vars->get(name).get_args_count() == count)) {
 			std::cout << "Used undeclared function " << name << " with " << (int)count << " arguments" << std::endl;
 			throw -1;
 		}
 
-		estack.push(ExprState(functions.get({name, count}), 2));
+		estack.push(ExprState(vars->get(name).get_function(), 2));
 		estack.push(ExprState(expr->getParam(), 1));
 	}
 }

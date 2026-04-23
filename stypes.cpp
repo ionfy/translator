@@ -5,6 +5,17 @@ Types Type::get_type() const {
 	return type;
 }
 
+FunctionDef* Type::get_function() const
+{
+	if (type != Types::FUNCTION) throw - 1;
+	return func;
+}
+
+char Type::get_args_count() const
+{
+	return args_count;
+}
+
 bool Type::is_numeric() const{
 	if (type == Types::BOOL || type == Types::INT || type == Types::DOUBLE) return 1;
 	else return 0;
