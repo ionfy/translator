@@ -6,18 +6,27 @@
 #include <stack>
 #include <string>
 
-struct ExprState {
+#define MAX_EXPECTED_VALUES 3
+
+struct ExprFrame {
 	Expr* expr;
 	char state;
-	ExprState(Expr* _expr, char _state = 0): expr(_expr), state(_state) {}
+
+	ExprFrame* target;
+	int slot;
+
+	Type values[MAX_EXPECTED_VALUES];
+	int complited = 0;
+
+	ExprFrame(Expr* _expr, char _state = 0, ExprFrame* _trg = nullptr, int _slot = 0): expr(_expr), state(_state), target(_trg), slot(_slot) {}
 };
 
 class IterRun {
-	std::stack<ExprState> estack;
+	std::stack<ExprFrame> estack;
 	MemNodeT* vars;
 	std::stack<Type> valstack;
 	std::stack<std::string> strstack;
-	std::stack<ExprState*> ret;
+	std::stack<ExprFrame*> ret;
 	std::stack<MemNodeT*> retvars;
 	int lastsemi = 0;
 public:
