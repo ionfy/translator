@@ -16,28 +16,28 @@ struct ExprFrame {
 	int slot;
 
 	Type values[MAX_EXPECTED_VALUES];
-	int complited = 0;
+	int completed = 0;
 
 	ExprFrame(Expr* _expr, char _state = 0, ExprFrame* _trg = nullptr, int _slot = 0): expr(_expr), state(_state), target(_trg), slot(_slot) {}
 };
 
 class IterRun {
-	std::stack<ExprFrame> estack;
+	std::stack<ExprFrame* > estack;
 	MemNodeT* vars;
 	std::stack<Type> valstack;
 	std::stack<std::string> strstack;
-	std::stack<ExprFrame*> ret;
+	std::stack<ExprFrame* > ret;
 	std::stack<MemNodeT*> retvars;
 	int lastsemi = 0;
 public:
 	IterRun(): vars(new MemNodeT()) {}
-	void process(Var* expr, char state);
-	void process(RawVal* expr, char state);
-	void process(UnOperation* expr, char state);
-	void process(BiOperation* expr, char state);
-	void process(TriOperation* expr, char state);
-	void process(FunctionParam* expr, char state);
-	void process(FunctionDef* expr, char state);
-	void process(FunctionCall* expr, char state);
+	void process(Var* expr, ExprFrame* frame);
+	void process(RawVal* expr, ExprFrame* frame);
+	void process(UnOperation* expr, ExprFrame* frame);
+	void process(BiOperation* expr, ExprFrame* frame);
+	void process(TriOperation* expr, ExprFrame* frame);
+	void process(FunctionParam* expr, ExprFrame* frame);
+	void process(FunctionDef* expr, ExprFrame* frame);
+	void process(FunctionCall* expr, ExprFrame* frame);
 	void run(Expr* expr);
 };

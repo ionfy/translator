@@ -5,15 +5,15 @@
 std::string Var::getVal() {
 	return val;
 }
-void Var::process(IterRun *itr, char state) {
-	itr->process(this, state);
+void Var::process(IterRun* itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 Type RawVal::getVal() {
 	return val;
 }
-void RawVal::process(IterRun *itr, char state) {
-	itr->process(this, state);
+void RawVal::process(IterRun *itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 OperationType UnOperation::getOp() {
@@ -22,8 +22,8 @@ OperationType UnOperation::getOp() {
 Expr* UnOperation::getNext() {
 	return next;
 }
-void UnOperation::process(IterRun *itr, char state) {
-	itr->process(this, state);
+void UnOperation::process(IterRun *itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 OperationType BiOperation::getOp() {
@@ -35,8 +35,8 @@ Expr* BiOperation::getLeft() {
 Expr* BiOperation::getRight() {
 	return right;
 }
-void BiOperation::process(IterRun *itr, char state) {
-	itr->process(this, state);
+void BiOperation::process(IterRun *itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 OperationType TriOperation::getOp() {
@@ -51,15 +51,15 @@ Expr* TriOperation::getMidle() {
 Expr* TriOperation::getRight() {
 	return right;
 }
-void TriOperation::process(IterRun *itr, char state) {
-	itr->process(this, state);
+void TriOperation::process(IterRun *itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 Expr* FunctionParam::getExpr() {
 	return expr;
 }
-void FunctionParam::process(IterRun*itr, char state) {
-	itr->process(this, state);
+void FunctionParam::process(IterRun*itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 Expr* FunctionDef::getName() {
@@ -74,8 +74,8 @@ Expr* FunctionDef::getBody() {
 MemNodeT*& FunctionDef::getScreen() {
 	return screen;
 }
-void FunctionDef::process(IterRun*itr, char state) {
-	itr->process(this, state);
+void FunctionDef::process(IterRun*itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 
 Expr* FunctionCall::getName() {
@@ -84,7 +84,7 @@ Expr* FunctionCall::getName() {
 Expr* FunctionCall::getParam() {
 	return param;
 }
-void FunctionCall::process(IterRun*itr, char state) {
-	itr->process(this, state);
+void FunctionCall::process(IterRun*itr, ExprFrame* frame) {
+	itr->process(this, frame);
 }
 

@@ -17,10 +17,11 @@ enum class OperationType: int {
 };
 
 class IterRun;
+struct ExprFrame;
 
 class Expr {
 public:
-	virtual void process(IterRun* itr, char state) = 0;
+	virtual void process(IterRun* itr, ExprFrame* frame) = 0;
 };
 
 class Var : public Expr {
@@ -28,7 +29,7 @@ class Var : public Expr {
 public:
 	Var(std::string _val) : val(_val) {}
 	std::string getVal();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 class RawVal: public Expr {
@@ -36,7 +37,7 @@ class RawVal: public Expr {
 public:
 	RawVal(Type _val): val(_val) {}
 	Type getVal();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 class UnOperation: public Expr {
@@ -46,7 +47,7 @@ public:
 	UnOperation(OperationType _op, Expr* _next): op(_op), next(_next) {}
 	OperationType getOp();
 	Expr* getNext();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 class BiOperation: public Expr {
@@ -58,7 +59,7 @@ public:
 	OperationType getOp();
 	Expr* getLeft();
 	Expr* getRight();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 class TriOperation: public Expr {
@@ -72,7 +73,7 @@ public:
 	Expr* getLeft();
 	Expr* getMidle();
 	Expr* getRight();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 class FunctionParam: public Expr {
@@ -80,7 +81,7 @@ class FunctionParam: public Expr {
 public:
 	FunctionParam(Expr* _expr): expr(_expr) {}
 	Expr* getExpr();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 class FunctionDef: public Expr {
@@ -94,7 +95,7 @@ public:
 	Expr* getParam();
 	Expr* getBody();
 	MemNodeT*& getScreen();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 
 struct FuncDesc {
@@ -123,6 +124,6 @@ public:
 	FunctionCall(Expr* _name, Expr* _param): name(_name), param(_param) {}
 	Expr* getName();
 	Expr* getParam();
-	void process(IterRun *itr, char state) override;
+	void process(IterRun* itr, ExprFrame* frame) override;
 };
 

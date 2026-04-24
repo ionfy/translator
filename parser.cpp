@@ -125,6 +125,15 @@ Expr* Parser::getTreeFromString(std::string str) {
 		ParserToken ptk = gettoken(tokens.front());
 		tokens.pop();
 		while (1) {
+			if (checklast({ FUNCDEF, VAR, LPRNT, EXPR, RPRNT, PROG })) {
+				ParserToken tok = { PROG, new FunctionDef(
+						scope[scope.size() - 5].expr,
+					new FunctionParam(scope[scope.size() - 3].expr),
+					scope[scope.size() - 1].expr) };
+				deletelast(6);
+				scope.push_back(tok);
+				continue;
+			}
 
 			if (checklast({FUNCDEF, VAR, LPRNT, PARAM, RPRNT, PROG})) {
 				ParserToken tok = {PROG, new FunctionDef(
@@ -147,9 +156,21 @@ Expr* Parser::getTreeFromString(std::string str) {
 				break;
 			}
 
+			if (checklast({FUNCDEF, VAR, LPRNT, EXPR, RPRNT })) {
+				break;
+			}
+
 			if (checklast({VAR, LPRNT, PARAM, RPRNT})) {
 				ParserToken tok = {EXPR, new FunctionCall(
 						scope[scope.size() - 4].expr, scope[scope.size() - 2].expr)};
+				deletelast(4);
+				scope.push_back(tok);
+				continue;
+			}
+
+			if (checklast({ VAR, LPRNT, EXPR, RPRNT })) {
+				ParserToken tok = { EXPR, new FunctionCall(
+						scope[scope.size() - 4].expr, new FunctionParam(scope[scope.size() - 2].expr)) };
 				deletelast(4);
 				scope.push_back(tok);
 				continue;
@@ -169,16 +190,20 @@ Expr* Parser::getTreeFromString(std::string str) {
 				continue;
 			}
 
-			if (checklast({PARAM, COMMA, EXPR})) {
-				ParserToken tok = {PARAM, new BiOperation(OperationType::COMMA, scope[scope.size() - 3].expr, new FunctionParam(scope[scope.size() - 1].expr))};
+			if (checklast({EXPR, COMMA, EXPR }) && ptk.type == RPRNT) {
+				ParserToken tok = {PARAM, new BiOperation(OperationType::COMMA,
+					new FunctionParam(scope[scope.size() - 3].expr),
+					new FunctionParam(scope[scope.size() - 1].expr))};
 				deletelast(3);
 				scope.push_back(tok);
 				continue;
 			}
 
-			if (checklast({VAR, LPRNT, EXPR}) && lesspriority(ASSIGN, ptk.type)) {
-				ParserToken tok = {PARAM, new FunctionParam(scope[scope.size() - 1].expr)};
-				deletelast(1);
+			if (checklast({ EXPR, COMMA, PARAM })) {
+				ParserToken tok = { PARAM, new BiOperation(OperationType::COMMA,
+					new FunctionParam(scope[scope.size() - 3].expr),
+					scope[scope.size() - 1].expr) };
+				deletelast(3);
 				scope.push_back(tok);
 				continue;
 			}
