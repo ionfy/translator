@@ -13,6 +13,7 @@ FunctionDef* Type::get_function() const
 
 char Type::get_args_count() const
 {
+	if (type != Types::FUNCTION) throw - 1;
 	return args_count;
 }
 
@@ -55,6 +56,11 @@ std::string Type::to_string() const {
 	if (type == Types::DOUBLE) return std::to_string(double_val);
 	if (type == Types::STRING) return string_val;
 	throw -1;
+}
+
+std::vector<Type> Type::to_list() const{
+	if (type != Types::LIST) throw -1;
+	return list_val;
 }
 
 Type Type::operator+(const Type& other) const {
