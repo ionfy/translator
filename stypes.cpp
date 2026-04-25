@@ -17,6 +17,11 @@ char Type::get_args_count() const
 	return args_count;
 }
 
+std::vector<Type>& Type::get_list() {
+	if (type != Types::LIST) throw - 1;
+	return list_val;
+}
+
 bool Type::is_numeric() const{
 	if (type == Types::BOOL || type == Types::INT || type == Types::DOUBLE) return 1;
 	else return 0;

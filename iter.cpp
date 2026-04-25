@@ -13,9 +13,9 @@ case OperationType::optype:                      \
 	if (frame->state == 0) {                       \
 		rframe = next_frame(frame, 1);               \
 		estack.push(rframe);                         \
-		estack.push(new ExprFrame(expr->getRight(),  \
+		estack.push(fbr.get(expr->getRight(),  \
 					0, rframe, 1));                        \
-		estack.push(new ExprFrame(expr->getLeft(),   \
+		estack.push(fbr.get(expr->getLeft(),   \
 					0, rframe, 0));                        \
 	}                                              \
 	else {                                         \
@@ -25,15 +25,15 @@ case OperationType::optype:                      \
 	}                                              \
 	break;
 
-void send_frame(ExprFrame* curr, Type val) {
+void send_frame(ExprFrame* curr, Type& val) {
 	if (curr->target) {
 		curr->target->values[curr->slot] = val;
-		(curr->target->completed)++;
+		++(curr->target->completed);
 	}
 }
 
-ExprFrame* next_frame(ExprFrame* curr, char state) {
-	return new ExprFrame(curr->expr, state, curr->target, curr->slot);
+ExprFrame* IterRun::next_frame(ExprFrame* curr, char state) {
+	return fbr.get(curr->expr, state, curr->target, curr->slot);
 }
 
 void IterRun::process(Var* expr, ExprFrame* frame) {
@@ -60,7 +60,7 @@ void IterRun::process(UnOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getNext(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getNext(), 0, rframe, 0));
 			}
 			else {
 				if (frame->completed < 1) throw -1;
@@ -71,8 +71,8 @@ void IterRun::process(UnOperation* expr, ExprFrame* frame) {
 		case OperationType::BLOCK:
 			if (frame->state == 0) {
 				vars = new MemNodeT(vars);
-				estack.push(new ExprFrame(expr, 1));
-				estack.push(new ExprFrame(expr->getNext()));
+				estack.push(fbr.get(expr, 1));
+				estack.push(fbr.get(expr->getNext()));
 			}
 			else {
 				MemNodeT* node = vars;
@@ -85,10 +85,11 @@ void IterRun::process(UnOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getNext(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getNext(), 0, rframe, 0));
 			}
 			else {
 				while (estack.top() != ret.top()) {
+					fbr.free(estack.top());
 					estack.pop();
 				}
 				if (estack.top()->target) {
@@ -104,7 +105,7 @@ void IterRun::process(UnOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getNext(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getNext(), 0, rframe, 0));
 			}
 			else {
 				if (frame->completed < 1) throw -1;
@@ -135,8 +136,8 @@ void IterRun::process(BiOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getRight(), 0, rframe, 1));
-				estack.push(new ExprFrame(expr->getLeft(), 1, rframe, 0));
+				estack.push(fbr.get(expr->getRight(), 0, rframe, 1));
+				estack.push(fbr.get(expr->getLeft(), 1, rframe, 0));
 			}
 			else {
 				if (frame->completed < 2) throw -1;
@@ -150,13 +151,13 @@ void IterRun::process(BiOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getLeft(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getLeft(), 0, rframe, 0));
 			}
 			else if (frame->state == 1) {
 				if (frame->completed < 1) throw - 1;
 				if (frame->values[0].to_bool()) {
 					estack.push(next_frame(frame, 0));
-					estack.push(new ExprFrame(expr->getRight()));
+					estack.push(fbr.get(expr->getRight()));
 				}
 			}
 			break;
@@ -165,27 +166,27 @@ void IterRun::process(BiOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getLeft(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getLeft(), 0, rframe, 0));
 			}
 			else if (frame->state == 1) {
 				if (frame->completed < 1) throw - 1;
 				if (frame->values[0].to_bool()) {
-					estack.push(new ExprFrame(expr->getRight()));
+					estack.push(fbr.get(expr->getRight()));
 				}
 			}
 			break;
 
 		case OperationType::SEMI:
-			estack.push(new ExprFrame(expr->getRight()));
-			estack.push(new ExprFrame(expr->getLeft()));
+			estack.push(fbr.get(expr->getRight()));
+			estack.push(fbr.get(expr->getLeft()));
 			break;
 
 		case OperationType::COMMA:
 			if (frame->state == 0) { // число
 				ExprFrame* rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getRight(), 0, rframe, 0));
-				estack.push(new ExprFrame(expr->getLeft(), 0, rframe, 1));
+				estack.push(fbr.get(expr->getRight(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getLeft(), 0, rframe, 1));
 			}
 			else if (frame->state == 1) {
 				if (frame->completed < 2) throw -1;
@@ -194,8 +195,8 @@ void IterRun::process(BiOperation* expr, ExprFrame* frame) {
 			else if (frame->state == 2) {
 				ExprFrame* rframe = next_frame(frame, 3);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getRight(), 2, rframe, 0));
-				estack.push(new ExprFrame(expr->getLeft(), 2, rframe, 1));
+				estack.push(fbr.get(expr->getRight(), 2, rframe, 0));
+				estack.push(fbr.get(expr->getLeft(), 2, rframe, 1));
 			}
 			else if (frame->state == 3) {
 				if (frame->completed < 2) throw -1;
@@ -208,8 +209,8 @@ void IterRun::process(BiOperation* expr, ExprFrame* frame) {
 			else if (frame->state == 4) {
 				ExprFrame* rframe = next_frame(frame, 5);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getRight(), 4, rframe, 0));
-				estack.push(new ExprFrame(expr->getLeft(), 4, rframe, 1));
+				estack.push(fbr.get(expr->getRight(), 4, rframe, 0));
+				estack.push(fbr.get(expr->getLeft(), 4, rframe, 1));
 			}
 			else if (frame->state == 5) {
 				if (frame->completed < 2) throw - 1;
@@ -233,15 +234,15 @@ void IterRun::process(TriOperation* expr, ExprFrame* frame) {
 			if (frame->state == 0) {
 				rframe = next_frame(frame, 1);
 				estack.push(rframe);
-				estack.push(new ExprFrame(expr->getLeft(), 0, rframe, 0));
+				estack.push(fbr.get(expr->getLeft(), 0, rframe, 0));
 			}
 			else if (frame->state == 1) {
 				if (frame->completed < 1) throw -1;
 				if (frame->values[0].to_bool()) {
-					estack.push(new ExprFrame(expr->getMidle()));
+					estack.push(fbr.get(expr->getMidle()));
 				}
 				else {
-					estack.push(new ExprFrame(expr->getRight()));
+					estack.push(fbr.get(expr->getRight()));
 				}
 			}
 			break;
@@ -260,7 +261,7 @@ void IterRun::process(FunctionParam* expr, ExprFrame* frame) {
 	else if (frame->state == 2) { // знач 1
 		ExprFrame* rframe = next_frame(frame, 1);
 		estack.push(rframe);
-		estack.push(new ExprFrame(expr->getExpr(), 0, rframe, 0));
+		estack.push(fbr.get(expr->getExpr(), 0, rframe, 0));
 	}
 	else if (frame->state == 3) { // имя 2
 		if (frame->completed < 1) throw - 1;
@@ -269,7 +270,7 @@ void IterRun::process(FunctionParam* expr, ExprFrame* frame) {
 	else if (frame->state == 4) { // имя 1
 		ExprFrame* rframe = next_frame(frame, 3);
 		estack.push(rframe);
-		estack.push(new ExprFrame(expr->getExpr(), 1, rframe, 0));
+		estack.push(fbr.get(expr->getExpr(), 1, rframe, 0));
 	}
 }
 
@@ -278,8 +279,8 @@ void IterRun::process(FunctionDef* expr, ExprFrame* frame) {
 		expr->getScreen() = vars;
 		ExprFrame* rframe = next_frame(frame, 1);
 		estack.push(rframe);
-		estack.push(new ExprFrame(expr->getName(), 1, rframe, 0));
-		estack.push(new ExprFrame(expr->getParam(), 0, rframe, 1));
+		estack.push(fbr.get(expr->getName(), 1, rframe, 0));
+		estack.push(fbr.get(expr->getParam(), 0, rframe, 1));
 	}
 	else if (frame->state == 1) {
 		if (frame->completed < 2) throw -1;
@@ -294,12 +295,10 @@ void IterRun::process(FunctionDef* expr, ExprFrame* frame) {
 
 		ExprFrame* rframe = next_frame(frame, 3);
 		estack.push(rframe);
-		estack.push(new ExprFrame(expr->getParam(), 4, rframe, 1));
+		estack.push(fbr.get(expr->getParam(), 4, rframe, 1));
 
-		frame->target = rframe;
-		frame->slot = 0;
-		if (frame->completed >= 1)
-			send_frame(frame, frame->values[0]);
+		rframe->values[0] = frame->values[0];
+		rframe->completed = frame->completed;
 	}
 	else if (frame->state == 3) {
 		if (frame->completed >= 2) {
@@ -309,8 +308,8 @@ void IterRun::process(FunctionDef* expr, ExprFrame* frame) {
 			auto v1p = v1.begin();
 			while (v1p != v1.end()) {
 				vars->insert_last((*v1p).to_string(), *v0p);
-				v1p++;
-				v0p++;
+				++v1p;
+				++v0p;
 			}
 		}
 
@@ -318,7 +317,7 @@ void IterRun::process(FunctionDef* expr, ExprFrame* frame) {
 		estack.push(rframe);
 		ret.push(rframe);
 
-		estack.push(new ExprFrame(expr->getBody()));
+		estack.push(fbr.get(expr->getBody()));
 	}
 	else {
 		while (vars != expr->getScreen()) {
@@ -336,8 +335,8 @@ void IterRun::process(FunctionCall* expr, ExprFrame* frame) {
 	if (frame->state == 0) {
 		ExprFrame* rframe = next_frame(frame, 1);
 		estack.push(rframe);
-		estack.push(new ExprFrame(expr->getName(), 1, rframe, 0));
-		estack.push(new ExprFrame(expr->getParam(), 0, rframe, 1));
+		estack.push(fbr.get(expr->getName(), 1, rframe, 0));
+		estack.push(fbr.get(expr->getParam(), 0, rframe, 1));
 	}
 	else {
 		if (frame->completed < 2) throw -1;
@@ -351,18 +350,18 @@ void IterRun::process(FunctionCall* expr, ExprFrame* frame) {
 			throw -1;
 		}
 
-		ExprFrame* func = new ExprFrame(vars->get(name).get_function(), 2, frame->target, frame->slot);
+		ExprFrame* func = fbr.get(vars->get(name).get_function(), 2, frame->target, frame->slot);
 		estack.push(func);
-		estack.push(new ExprFrame(expr->getParam(), 2, func, 0));
+		estack.push(fbr.get(expr->getParam(), 2, func, 0));
 	}
 }
 
 void IterRun::run(Expr* expr) {
-	estack.push(new ExprFrame(expr, 0));
+	estack.push(fbr.get(expr, 0));
 	while (!estack.empty()) {
 		ExprFrame* curr = estack.top();
 		estack.pop();
 		curr->expr->process(this, curr);
-		delete curr;
+		fbr.free(curr);
 	}
 }

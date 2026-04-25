@@ -27,6 +27,7 @@ public:
 	Types get_type() const;
 	FunctionDef* get_function() const;
 	char get_args_count() const;
+	std::vector<Type>& get_list();
 
 	bool is_numeric() const;
 	bool to_bool() const;
