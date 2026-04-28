@@ -66,6 +66,7 @@ class IterRun {
 	FrameFabric fbr;
 	std::stack<ExprFrame* > ret;
 	std::stack<MemNodeT*> retvars;
+	std::stack<Type> parameters;
 	int lastsemi = 0;
 
 	ExprFrame* next_frame(ExprFrame* curr, char state);

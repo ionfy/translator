@@ -193,32 +193,12 @@ void IterRun::process(BiOperation* expr, ExprFrame* frame) {
 				send_frame(frame, frame->values[0] + frame->values[1]);
 			}
 			else if (frame->state == 2) {
-				ExprFrame* rframe = next_frame(frame, 3);
-				estack.push(rframe);
-				estack.push(fbr.get(expr->getRight(), 2, rframe, 0));
-				estack.push(fbr.get(expr->getLeft(), 2, rframe, 1));
+				estack.push(fbr.get(expr->getRight(), 2));
+				estack.push(fbr.get(expr->getLeft(), 2));
 			}
-			else if (frame->state == 3) {
-				if (frame->completed < 2) throw -1;
-				std::vector<Type> vec = frame->values[0].to_list();
-				std::vector<Type> vec2 = frame->values[1].to_list();
-
-				vec.insert(vec.end(), vec2.begin(), vec2.end());
-				send_frame(frame, Type(vec));
-			}
-			else if (frame->state == 4) {
-				ExprFrame* rframe = next_frame(frame, 5);
-				estack.push(rframe);
-				estack.push(fbr.get(expr->getRight(), 4, rframe, 0));
-				estack.push(fbr.get(expr->getLeft(), 4, rframe, 1));
-			}
-			else if (frame->state == 5) {
-				if (frame->completed < 2) throw - 1;
-				std::vector<Type> vec = frame->values[0].to_list();
-				std::vector<Type> vec2 = frame->values[1].to_list();
-
-				vec.insert(vec.end(), vec2.begin(), vec2.end());
-				send_frame(frame, Type(vec));
+			else {
+				estack.push(fbr.get(expr->getLeft(), 3));
+				estack.push(fbr.get(expr->getRight(), 3));
 			}
 			break;
 
@@ -256,22 +236,24 @@ void IterRun::process(FunctionParam* expr, ExprFrame* frame) {
 	}
 	else if (frame->state == 1) { // знач 2
 		if (frame->completed < 1) throw -1;
-		send_frame(frame, Type(std::vector<Type>(1, frame->values[0])));
+		parameters.push(frame->values[0]);
 	}
 	else if (frame->state == 2) { // знач 1
 		ExprFrame* rframe = next_frame(frame, 1);
 		estack.push(rframe);
 		estack.push(fbr.get(expr->getExpr(), 0, rframe, 0));
 	}
-	else if (frame->state == 3) { // имя 2
-		if (frame->completed < 1) throw - 1;
-		send_frame(frame, Type(std::vector<Type>(1, frame->values[0])));
-	}
-	else if (frame->state == 4) { // имя 1
-		ExprFrame* rframe = next_frame(frame, 3);
+	else if (frame->state == 3) { // имя 1
+		ExprFrame* rframe = next_frame(frame, 4);
 		estack.push(rframe);
 		estack.push(fbr.get(expr->getExpr(), 1, rframe, 0));
 	}
+	else { // имя 2
+		if (frame->completed < 1) throw - 1;
+		vars->insert_last(frame->values[0].to_string(), parameters.top());
+		parameters.pop();
+	}
+	
 }
 
 void IterRun::process(FunctionDef* expr, ExprFrame* frame) {
@@ -295,29 +277,11 @@ void IterRun::process(FunctionDef* expr, ExprFrame* frame) {
 
 		ExprFrame* rframe = next_frame(frame, 3);
 		estack.push(rframe);
-		estack.push(fbr.get(expr->getParam(), 4, rframe, 1));
-
-		rframe->values[0] = frame->values[0];
-		rframe->completed = frame->completed;
-	}
-	else if (frame->state == 3) {
-		if (frame->completed >= 2) {
-			auto v0 = frame->values[0].to_list();
-			auto v0p = v0.begin();
-			auto v1 = frame->values[1].to_list();
-			auto v1p = v1.begin();
-			while (v1p != v1.end()) {
-				vars->insert_last((*v1p).to_string(), *v0p);
-				++v1p;
-				++v0p;
-			}
-		}
-
-		ExprFrame* rframe = next_frame(frame, 4);
-		estack.push(rframe);
 		ret.push(rframe);
 
 		estack.push(fbr.get(expr->getBody()));
+
+		estack.push(fbr.get(expr->getParam(), 3));
 	}
 	else {
 		while (vars != expr->getScreen()) {
@@ -350,9 +314,8 @@ void IterRun::process(FunctionCall* expr, ExprFrame* frame) {
 			throw -1;
 		}
 
-		ExprFrame* func = fbr.get(vars->get(name).get_function(), 2, frame->target, frame->slot);
-		estack.push(func);
-		estack.push(fbr.get(expr->getParam(), 2, func, 0));
+		estack.push(fbr.get(vars->get(name).get_function(), 2, frame->target, frame->slot));
+		estack.push(fbr.get(expr->getParam(), 2));
 	}
 }
 
