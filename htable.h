@@ -2,8 +2,6 @@
 
 #include <string>
 
-int char_to_int(char c);
-
 size_t hash(long long item);
 
 size_t hash(std::string item);
@@ -50,6 +48,8 @@ class THashTable {
 					pos = get_hash_pos(pos);
 					any = !new_rows[pos].used;
 				}
+				if (!any) throw - 1;
+				new_rows[pos] = KeyNode(rows[i].key, rows[i].field);
 			}
 		}
 		delete[] rows;

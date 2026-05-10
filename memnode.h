@@ -2,10 +2,11 @@
 
 #include "stypes.h"
 #include "table.h"
+#include "htable.h"
 
-template <typename KeyType, typename FieldType>
+template <typename KeyType, typename FieldType, typename TableType = TTable<KeyType, FieldType>>
 class MemNode {
-	TTable<KeyType, FieldType> table;
+	TableType table;
 	MemNode* parent;
 public:
 	MemNode(): table(), parent(nullptr) {}
