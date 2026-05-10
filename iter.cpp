@@ -32,6 +32,13 @@ void send_frame(ExprFrame* curr, Type& val) {
 	}
 }
 
+void send_frame(ExprFrame* curr, Type&& val) {
+	if (curr->target) {
+		curr->target->values[curr->slot] = val;
+		++(curr->target->completed);
+	}
+}
+
 ExprFrame* IterRun::next_frame(ExprFrame* curr, char state) {
 	return fbr.get(curr->expr, state, curr->target, curr->slot);
 }
