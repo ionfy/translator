@@ -1,23 +1,18 @@
-#include "table.h"
 #include "tree.h"
 #include "iter.h"
-#include "lexer.h"
 #include "parser.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 
-int main() {
-	//Expr* top = getTree("a=23+45*32*(23+4);a2=a+45-32;b=4;c=a+b;a=a+a;c=a");
-	//PrintVisitor v;
-	//top->accept(&v);
-	//std::cout << "\n";
-	//CalcVisitor cv;
-	//top->accept(&cv);
-	//IterRun r;
-	//r.run(top);
-	//
+int main(int argc, char** argv) {
+	std::string input;
+	if (argc > 1)
+		input = argv[1];
+	else
+		input = "../code.txt";
 
-	std::ifstream file("../code.txt");
+	std::ifstream file(input);
 
 	std::string line;
 	std::string fileContent;
@@ -30,6 +25,4 @@ int main() {
 	Expr* e = p.getTreeFromString(fileContent);
 	IterRun r;
 	r.run(e);
-	//Avt av;
-	//av.fromString("a={}2+23+45*32*(23+4);a2+=a+-45-32;b=4;c=a+b;a=a+a;c=a\n");
 }
