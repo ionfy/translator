@@ -3,6 +3,7 @@
 #include "stypes.h"
 #include "table.h"
 #include "htable.h"
+#include <string>
 
 template <typename KeyType, typename FieldType, typename TableType = TTable<KeyType, FieldType>>
 class MemNode {
