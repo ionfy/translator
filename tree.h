@@ -88,7 +88,7 @@ class FunctionDef: public Expr {
 	Expr* name;
 	Expr* param;
 	Expr* body;
-	MemNode<std::string, Type>* screen;
+	MemNodeT* screen;
 public:
 	FunctionDef(Expr* _name, Expr* _param, Expr* _body): name(_name), param(_param), body(_body), screen() {}
 	Expr* getName();
