@@ -6,5 +6,4 @@ output/
 temp/
 *.exe
 compile_commands.json
-*.old
-code.txt
+*.code
