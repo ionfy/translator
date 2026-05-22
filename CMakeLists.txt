@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.10 FATAL_ERROR)
 
-project (TreeOp)
+project (MyLang)
 set (CMAKE_CXX_STANDARD 17)
 
 set (OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/output")
@@ -12,7 +12,7 @@ file (GLOB TARGET_SRC "src/*.cpp")
 
 add_executable (${PROJECT_NAME} ${TARGET_SRC})
 
-set_target_properties(TreeOp PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     VS_DEBUGGER_COMMAND_ARGUMENTS "simple.code"
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/examples"
 )

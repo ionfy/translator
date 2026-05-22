@@ -10,6 +10,7 @@ int main(int argc, char** argv) {
 	
 	if (argc < 2) {
 		std::cout << "Insert code filename" << std::endl;
+		std::cout << "Use: MyLang <*.code>" << std::endl;
 		return -1;
 	}
 	

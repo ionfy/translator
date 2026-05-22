@@ -1,4 +1,4 @@
-print "This is examples/simple.code"
+print "This is examples/simple.code";
 
 a = 1;
 print "a = " + a;
