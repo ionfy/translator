@@ -1,6 +1,4 @@
 #include "parser.h"
-#include <cstddef>
-#include <exception>
 #include <iostream>
 #include <queue>
 #include <string>
@@ -57,9 +55,9 @@ int Parser::lesspriority(ParserType left, ParserType right) {
 }
 
 int Parser::checklast(std::vector<ParserType> types) {
-	int sz = types.size();
+	size_t sz = types.size();
 	if (scope.size() < sz) return 0;
-	int start = scope.size() - sz;
+	size_t start = scope.size() - sz;
 	for (int i = 0; i < sz; i++) {
 		if (scope[start + i].type != types[i]) return 0;
 	}
