@@ -11,3 +11,8 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR}/lib)
 file (GLOB TARGET_SRC "src/*.cpp")
 
 add_executable (${PROJECT_NAME} ${TARGET_SRC})
+
+set_target_properties(TreeOp PROPERTIES
+    VS_DEBUGGER_COMMAND_ARGUMENTS "simple.code"
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/examples"
+)
