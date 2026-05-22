@@ -7,10 +7,13 @@
 
 int main(int argc, char** argv) {
 	std::string input;
-	if (argc > 1)
-		input = argv[1];
-	else
-		input = "../code.txt";
+	
+	if (argc < 2) {
+		std::cout << "Insert code filename" << std::endl;
+		return -1;
+	}
+	
+	input = argv[1];
 
 	std::ifstream file(input);
 

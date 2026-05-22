@@ -1,12 +1,9 @@
 #include "iter.h"
 #include "stypes.h"
-#include "table.h"
 #include "tree.h"
-#include <cmath>
 #include <iostream>
 #include <stack>
 #include <string>
-#include <vector>
 
 #define SIMPLEOPERATION(optype, op)              \
 case OperationType::optype:                      \
