@@ -28,5 +28,5 @@ while (i <= 15) {
 
 ## Запуск программы
 ```
-./MyLang ./examples/factorial.code
+./MyLang ./examples/simple.code
 ```
